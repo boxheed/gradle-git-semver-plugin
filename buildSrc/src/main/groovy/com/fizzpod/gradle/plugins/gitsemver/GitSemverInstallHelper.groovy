@@ -32,6 +32,9 @@ public class GitSemverInstallHelper {
 
     static def getBinaryName(def version, def os, def arch) {
         def name = "git-semver_" + version + "_" + os + "_" + arch
+        if(os.equals(WINDOWS)) {
+            name = name + ".exe"
+        }
         return name
     }
     
@@ -71,12 +74,11 @@ public class GitSemverInstallHelper {
         def arch = ARM64
         if(context.extension.arch != null) {
             arch = context.extension.arch
-        } else 
-        if(systemArch.equalsIgnoreCase("x86_64") || systemArch.equalsIgnoreCase("amd64")) {
-            return AMD64
+        } else if(systemArch.equalsIgnoreCase("x86_64") || systemArch.equalsIgnoreCase("amd64")) {
+            arch = AMD64
         } 
         context.logger.info("Architecture resolved to {}", arch)
-        return ARM64
+        return arch
     }
     
 

@@ -18,13 +18,6 @@ public class GitSemverInstallTask extends DefaultTask {
 
     public static final String NAME = "gitSemverInstall"
 
-    public static final String WINDOWS = "windows"
-    public static final String LINUX = "linux"
-    public static final String MAC = "darwin"
-    
-    public static final String AMD64 = "amd64"
-    public static final String ARM64 = "arm64"
-
     public static final String GITSEMVER_INSTALL_DIR = ".git-semver"
 
     private Project project
@@ -52,13 +45,21 @@ public class GitSemverInstallTask extends DefaultTask {
         context.logger = project.getLogger()
         context.project = project
         context.extension = extension
+        context.logger.info("Getting OS")
         context.os = getOs(context)
+        context.logger.info("Getting Arch")
         context.arch = getArch(context)
+        context.logger.info("Getting release")
         context.release = getRelease(context)
+        context.logger.info("Getting asset")
         context.asset = getAsset(context)
+        context.logger.info("Getting cache location")
         context.cache = getCacheLocation(context)
+        context.logger.info("Getting cached binary name")
         context.cacheBinary = getCacheBinary(context)
+        context.logger.info("Downloading asset")
         download(context)
+        context.logger.info("Installing asset")
         install(context)
     }
 
@@ -103,8 +104,12 @@ public class GitSemverInstallTask extends DefaultTask {
 
     def getRelease(def context) {
         def extension = context.extension
+        context.logger.info("Looking for git-semver version {}", extension.version)
         GitHub github = GitHub.connectAnonymously();
+        context.logger.info("Connecting to repository {}", extension.repository)
+        context.logger.info("Connecting to GitHub APi at {}", github.getApiUrl())
         GHRepository gitSemverRepository = github.getRepository(extension.repository);
+        context.logger.info("Getting latest git-semver release")
         GHRelease gitSemverRelease = gitSemverRepository.getLatestRelease();
         //match against requeired release
         if(!"latest".equalsIgnoreCase(extension.version)) {
