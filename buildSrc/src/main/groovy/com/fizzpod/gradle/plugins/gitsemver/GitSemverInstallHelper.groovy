@@ -26,12 +26,12 @@ public class GitSemverInstallHelper {
         return new File(root, GITSEMVER_INSTALL_DIR)
     }
 
-    static def getBinaryArchiveName(def version, def os, def arch) {
-        getBinaryName(version, os, arch) + ".tar.gz"
+    static def getBinaryArchiveName(def os, def arch) {
+        getBinaryName(os, arch) + ".tar.gz"
     }
 
-    static def getBinaryName(def version, def os, def arch) {
-        def name = "git-semver_" + version + "_" + os + "_" + arch
+    static def getBinaryName(def os, def arch) {
+        def name = "git-semver_" + os + "_" + arch
         if(os.equals(WINDOWS)) {
             name = name + ".exe"
         }
@@ -39,7 +39,7 @@ public class GitSemverInstallHelper {
     }
     
     static def getBinaryFile(def context) {
-        return new File(getInstallRoot(context), getBinaryName(context.release.getName(), context.os, context.arch))
+        return new File(getInstallRoot(context), getBinaryName(context.os, context.arch))
     }
 
     static def getBinaryFromConfig(def context) {

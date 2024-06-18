@@ -13,5 +13,7 @@ public class GitSemverPlugin implements Plugin<Project> {
 		project.extensions.create(NAME, GitSemverPluginExtension)
 		GitSemverInstallTask.register(project)
 		GitSemverInstallAllTask.register(project)
+		GitSemverCurrentVersionTask.register(project)
+		GitSemverNextVersionTask.register(project)
 	}
 }

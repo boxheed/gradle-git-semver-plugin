@@ -86,7 +86,7 @@ public class GitSemverInstallTask extends DefaultTask {
     }
 
     def getCacheBinary(def context) {
-        def gitSemverBinaryCacheFileName = getBinaryName(context.release.getName(), context.os, context.arch)
+        def gitSemverBinaryCacheFileName = getBinaryName(context.os, context.arch)
         return new File(context.cache, gitSemverBinaryCacheFileName)
     }
 
