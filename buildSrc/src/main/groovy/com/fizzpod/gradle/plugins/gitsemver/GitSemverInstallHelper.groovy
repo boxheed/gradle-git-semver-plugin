@@ -18,21 +18,25 @@ public class GitSemverInstallHelper {
     public static final String AMD64 = "amd64"
     public static final String ARM64 = "arm64"
 
-    public static final String OSV_INSTALL_DIR = ".git-semver"
+    public static final String GITSEMVER_INSTALL_DIR = ".git-semver"
 
 
     static def getInstallRoot(def context) {
         def root = context.project.rootDir
-        return new File(root, OSV_INSTALL_DIR)
+        return new File(root, GITSEMVER_INSTALL_DIR)
     }
 
-    static def getBinaryName(def os, def arch) {
-        def name = "git-semver_" + "version" + "_" + os + "_" + arch + ".tar.gz"
+    static def getBinaryArchiveName(def version, def os, def arch) {
+        getBinaryName(version, os, arch) + ".tar.gz"
+    }
+
+    static def getBinaryName(def version, def os, def arch) {
+        def name = "git-semver_" + version + "_" + os + "_" + arch
         return name
     }
     
     static def getBinaryFile(def context) {
-        return new File(getInstallRoot(context), getBinaryName(context.os, context.arch))
+        return new File(getInstallRoot(context), getBinaryName(context.release.getName(), context.os, context.arch))
     }
 
     static def getBinaryFromConfig(def context) {

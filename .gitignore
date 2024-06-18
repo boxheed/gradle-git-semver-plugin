@@ -6,3 +6,4 @@ bin
 .settings
 .vscode
 .osv-scanner
+.git-semver

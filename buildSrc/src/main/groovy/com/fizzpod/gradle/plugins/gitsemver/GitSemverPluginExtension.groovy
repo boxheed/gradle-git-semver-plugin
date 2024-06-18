@@ -1,4 +1,4 @@
-package com.fizzpod.gradle.plugins.osvscanner
+package com.fizzpod.gradle.plugins.gitsemver
 
 public class GitSemverPluginExtension {
 	def version = "latest"

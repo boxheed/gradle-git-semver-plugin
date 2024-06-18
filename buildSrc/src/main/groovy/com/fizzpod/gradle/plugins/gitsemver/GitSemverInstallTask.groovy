@@ -8,6 +8,9 @@ import javax.inject.Inject
 import org.apache.commons.lang3.SystemUtils
 import org.apache.commons.io.FileUtils
 import org.kohsuke.github.*
+import org.rauschig.jarchivelib.ArchiverFactory
+import org.rauschig.jarchivelib.ArchiveFormat
+import org.rauschig.jarchivelib.CompressionType
 
 import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
 
@@ -22,12 +25,12 @@ public class GitSemverInstallTask extends DefaultTask {
     public static final String AMD64 = "amd64"
     public static final String ARM64 = "arm64"
 
-    public static final String OSV_INSTALL_DIR = ".git-semver"
+    public static final String GITSEMVER_INSTALL_DIR = ".git-semver"
 
     private Project project
 
     @Inject
-    public OSVScannerInstallTask(Project project) {
+    public GitSemverInstallTask(Project project) {
         this.project = project
     }
 
@@ -53,7 +56,8 @@ public class GitSemverInstallTask extends DefaultTask {
         context.arch = getArch(context)
         context.release = getRelease(context)
         context.asset = getAsset(context)
-        context.location = getCacheLocation(context)
+        context.cache = getCacheLocation(context)
+        context.cacheBinary = getCacheBinary(context)
         download(context)
         install(context)
     }
@@ -61,34 +65,40 @@ public class GitSemverInstallTask extends DefaultTask {
     def install(def context) {
         def version = context.release.getName()
         def installFolder = getInstallRoot(context)
-        def osvFile = new File(installFolder, context.location.getName())
+        def gitSemverFile = new File(installFolder, context.cacheBinary.getName())
         def versionFile = new File(installFolder, 'git-semver.version')
         def contents = ""
         if(versionFile.exists()) {
             contents = versionFile.getText()
         }
-        if(version.equalsIgnoreCase(contents) && osvFile.exists()) {
+        if(version.equalsIgnoreCase(contents) && gitSemverFile.exists()) {
             return
         }
-        FileUtils.copyFile(context.location, osvFile)
-        osvFile.setExecutable(true)
+
+        FileUtils.copyFile(context.cacheBinary, gitSemverFile)
+        gitSemverFile.setExecutable(true)
         versionFile.write(context.release.getName())
     }
     def getInstallRoot(def context) {
         def root = context.project.rootDir
-        return new File(root, OSV_INSTALL_DIR)
+        return new File(root, GITSEMVER_INSTALL_DIR)
+    }
+
+    def getCacheBinary(def context) {
+        def gitSemverBinaryCacheFileName = getBinaryName(context.release.getName(), context.os, context.arch)
+        return new File(context.cache, gitSemverBinaryCacheFileName)
     }
 
     def getCacheLocation(def context) {
         def root = context.project.rootDir
-        def osvInstallRoot = new File(root, OSV_INSTALL_DIR)
+        def gitSemverInstallRoot = new File(root, GITSEMVER_INSTALL_DIR)
         def release = context.release
         def version = release.getName()
 
-        def osvInstallLocation = new File(osvInstallRoot, ".cache/" + version)
-        def osvFileName = getBinaryName(context.os, context.arch)
-        def osvFile = new File(osvInstallLocation, osvFileName)
-        return osvFile
+        return new File(gitSemverInstallRoot, ".cache/" + version)
+        //def gitSemverFileName = getBinaryName(version, context.os, context.arch)
+        //def gitSemverFile = new File(gitSemverInstallLocation, gitSemverFileName)
+        //return gitSemverFile
     }
 
     def getRelease(def context) {
@@ -136,11 +146,14 @@ public class GitSemverInstallTask extends DefaultTask {
         def asset = context.asset
         def url = asset.getBrowserDownloadUrl()
         context.logger.info("git-semver url resolved to {}", url)
-        def gitSemverFile = context.location
-        context.logger.info("Writing git-semver to {}", osvFile)
-        if(!gitSemverFile.exists()){
-            FileUtils.copyURLToFile(new URL(url), gitSemverFile, 120000, 120000)
-            gitSemverFile.setExecutable(true)
+        def gitSemverCacheBinary = context.cacheBinary
+        context.logger.info("Writing git-semver to {}", gitSemverCacheBinary)
+        if(!gitSemverCacheBinary.exists()){
+            FileUtils.copyURLToFile(new URL(url), gitSemverCacheBinary, 120000, 120000)
+            def archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
+            archiver.extract(gitSemverCacheBinary, gitSemverCacheBinary.getParentFile())
+            new File(gitSemverCacheBinary.getParentFile(), 'git-semver').renameTo(gitSemverCacheBinary)
+            gitSemverCacheBinary.setExecutable(true)
         }
     }
 
