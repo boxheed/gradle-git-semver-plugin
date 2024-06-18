@@ -8,10 +8,18 @@ dependencies {
   implementation 'commons-io:commons-io:2.16.1'
   implementation 'com.jayway.jsonpath:json-path:2.9.0'
   implementation 'us.springett:cvss-calculator:1.4.3'
-  //implementation 'org.apache.commons:commons-compress:1.21'
   implementation 'org.rauschig:jarchivelib:1.2.0'
   
 	testImplementation('com.netflix.nebula:nebula-test:10.6.1') {
-        exclude group: 'org.codehaus.groovy'
+    exclude group: 'org.codehaus.groovy'
+  }
+
+  constraints {
+    implementation('org.apache.commons:commons-compress') {
+      because 'version 1.21 imported as a dependency has a vulnerability'
+      version {
+          require '1.26.2'
+      }
+    }
   }
 }
