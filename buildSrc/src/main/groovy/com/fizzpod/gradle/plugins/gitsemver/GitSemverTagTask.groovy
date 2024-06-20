@@ -51,6 +51,7 @@ public class GitSemverTagTask extends DefaultTask {
         context.version = extension.nextSemverTask.runTask()
         context.cmd = createCommand(context)
         runCommand(context)
+        context.logger.lifecycle("Tagged repository with {}", context.version)
         
     }
 
