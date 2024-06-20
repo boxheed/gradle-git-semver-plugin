@@ -16,7 +16,7 @@ import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
 
 public class GitSemverInstallTask extends DefaultTask {
 
-    public static final String NAME = "gitSemverInstall"
+    public static final String NAME = "installGitSemver"
 
     public static final String GITSEMVER_INSTALL_DIR = ".git-semver"
 

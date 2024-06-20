@@ -13,7 +13,7 @@ import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
 
 public class GitSemverInstallAllTask extends GitSemverInstallTask {
 
-    public static final String NAME = "gitSemverInstallAll"
+    public static final String NAME = "installAllGitSemvers"
 
     private Project project
     private def osArches = [

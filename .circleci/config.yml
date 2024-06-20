@@ -21,9 +21,11 @@ jobs:
       - checkout
       - run: ./gradlew clean build 
       - run: ./gradlew tasks
-      - run: ./gradlew gitSemverInstall
-      - run: ./gradlew gitSemverCurrent
-      - run: ./gradlew gitSemverNext
+      - run: ./gradlew installGitSemver
+      - run: ./gradlew installAllGitSemvers
+      - run: ./gradlew gitStatus
+      - run: ./gradlew currentSemver
+      - run: ./gradlew nextSemver
   
   security:
     docker:

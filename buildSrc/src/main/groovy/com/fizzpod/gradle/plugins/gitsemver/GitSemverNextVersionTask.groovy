@@ -14,7 +14,7 @@ import static com.fizzpod.gradle.plugins.gitsemver.GitSemverRunnerTaskHelper.*
 
 public class GitSemverNextVersionTask extends DefaultTask {
 
-    public static final String NAME = "gitSemverNext"
+    public static final String NAME = "nextSemver"
 
     private Project project
 
