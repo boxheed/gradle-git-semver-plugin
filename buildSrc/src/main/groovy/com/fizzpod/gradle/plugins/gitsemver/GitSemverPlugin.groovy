@@ -17,9 +17,11 @@ public class GitSemverPlugin implements Plugin<Project> {
 		def currentVersionTask = GitSemverCurrentVersionTask.register(project)
 		def nextVersionTask = GitSemverNextVersionTask.register(project)
 		def statusTask = GitSemverStatusTask.register(project)
+		def tagTask = GitSemverTagTask.register(project)
 		extension.installTask = installTask
 		extension.semverTask = currentVersionTask
 		extension.nextSemverTask = nextVersionTask
 		extension.statusTask = statusTask
+		extension.tagTask = tagTask
 	}
 }

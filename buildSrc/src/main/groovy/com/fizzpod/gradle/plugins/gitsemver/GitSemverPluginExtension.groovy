@@ -14,6 +14,7 @@ public class GitSemverPluginExtension {
     def semverTask = null
     def nextSemverTask = null
     def statusTask = null
+    def tagTask = null
     def snapshotSuffix = "-SNAPSHOT"
     def stable = true
 

@@ -20,12 +20,12 @@ jobs:
           command: source <(curl -s https://raw.githubusercontent.com/boxheed/shippable-scripts/master/java-build-ci-setup)
       - checkout
       - run: ./gradlew clean build 
-      - run: ./gradlew tasks
       - run: ./gradlew installGitSemver
       - run: ./gradlew installAllGitSemvers
       - run: ./gradlew gitStatus
       - run: ./gradlew currentSemver
       - run: ./gradlew nextSemver
+      - run: ./gradlew properties
   
   security:
     docker:
