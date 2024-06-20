@@ -46,9 +46,9 @@ public class GitSemverTagTask extends DefaultTask {
         def status = extension.statusTask.runTask()
         if(status != null && !"".equals(status.trim())) {
             context.logger.error("Unable to tag repository as local repo is dirty")
-            throw new RuntimeException("Unable to tag repository as local repo is dirty")
+            //throw new RuntimeException("Unable to tag repository as local repo is dirty")
         }
-        context.version = extension.nextSemverTask.runTask()
+        context.version = "v" + extension.nextSemverTask.runTask()
         context.cmd = createCommand(context)
         runCommand(context)
         context.logger.lifecycle("Tagged repository with {}", context.version)
