@@ -26,6 +26,7 @@ jobs:
       - run: ./gradlew currentSemver
       - run: ./gradlew nextSemver
       - run: ./gradlew properties
+      - run: ./gradlew semverTag && ls git tag
   
   security:
     docker:
