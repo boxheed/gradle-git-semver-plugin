@@ -27,7 +27,7 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
         project.getLogger().info("Registering task {}", NAME)
         def taskContainer = project.getTasks()
 
-        taskContainer.create([name: NAME,
+        return taskContainer.create([name: NAME,
             type: GitSemverCurrentVersionTask,
             dependsOn: [],
             group: GitSemverPlugin.GROUP,
@@ -44,8 +44,9 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
         context.executable = getExecutable(context)
         context.mode = "latest"
         context.cmd = createCommand(context)
-        def version = runCommand(context)
+        def version = runCommand(context).trim()
         context.logger.lifecycle("Current version {}", version)
+        return version
     }
 
     def createCommand(def context) {

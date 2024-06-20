@@ -31,7 +31,7 @@ public class GitSemverInstallTask extends DefaultTask {
         project.getLogger().info("Registering task {}", NAME)
         def taskContainer = project.getTasks()
 
-        taskContainer.create([name: NAME,
+        return taskContainer.create([name: NAME,
             type: GitSemverInstallTask,
             dependsOn: [],
             group: GitSemverPlugin.GROUP,
@@ -49,22 +49,28 @@ public class GitSemverInstallTask extends DefaultTask {
         context.os = getOs(context)
         context.logger.info("Getting Arch")
         context.arch = getArch(context)
-        context.logger.info("Getting release")
-        context.release = getRelease(context)
-        context.logger.info("Getting asset")
-        context.asset = getAsset(context)
         context.logger.info("Getting cache location")
         context.cache = getCacheLocation(context)
         context.logger.info("Getting cached binary name")
         context.cacheBinary = getCacheBinary(context)
-        context.logger.info("Downloading asset")
-        download(context)
+        if(!"latest".equals(context.extension.version) && !context.cacheBinary.exists()){
+            context.logger.info("Getting release")
+            context.release = getRelease(context)
+            context.logger.info("Getting asset")
+            context.asset = getAsset(context)
+            context.logger.info("Getting cache location")
+            context.cache = getCacheLocation(context)
+            context.logger.info("Getting cached binary name")
+            context.cacheBinary = getCacheBinary(context)
+            context.logger.info("Downloading asset")
+            download(context)
+        }
         context.logger.info("Installing asset")
         install(context)
     }
 
     def install(def context) {
-        def version = context.release.getName()
+        def version = context.release != null? context.release.getName(): context.extension.version
         def installFolder = getInstallRoot(context)
         def gitSemverFile = new File(installFolder, context.cacheBinary.getName())
         def versionFile = new File(installFolder, 'git-semver.version')
@@ -78,7 +84,7 @@ public class GitSemverInstallTask extends DefaultTask {
 
         FileUtils.copyFile(context.cacheBinary, gitSemverFile)
         gitSemverFile.setExecutable(true)
-        versionFile.write(context.release.getName())
+        versionFile.write(version)
     }
     def getInstallRoot(def context) {
         def root = context.project.rootDir
@@ -94,7 +100,7 @@ public class GitSemverInstallTask extends DefaultTask {
         def root = context.project.rootDir
         def gitSemverInstallRoot = new File(root, GITSEMVER_INSTALL_DIR)
         def release = context.release
-        def version = release.getName()
+        def version = release != null? release.getName(): context.extension.version
 
         return new File(gitSemverInstallRoot, ".cache/" + version)
         //def gitSemverFileName = getBinaryName(version, context.os, context.arch)

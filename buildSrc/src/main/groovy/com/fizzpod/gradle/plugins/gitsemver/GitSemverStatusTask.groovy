@@ -12,16 +12,16 @@ import org.kohsuke.github.*
 import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
 import static com.fizzpod.gradle.plugins.gitsemver.GitSemverRunnerTaskHelper.*
 
-public class GitSemverNextVersionTask extends DefaultTask {
+public class GitSemverStatusTask extends DefaultTask {
 
-    public static final String NAME = "gitSemverNext"
+    public static final String NAME = "gitSemverStatus"
 
     private Project project
 
     private String nextVersion
 
     @Inject
-    public GitSemverNextVersionTask(Project project) {
+    public GitSemverStatusTask(Project project) {
         this.project = project
     }
 
@@ -30,10 +30,10 @@ public class GitSemverNextVersionTask extends DefaultTask {
         def taskContainer = project.getTasks()
 
         return taskContainer.create([name: NAME,
-            type: GitSemverNextVersionTask,
+            type: GitSemverStatusTask,
             dependsOn: [],
             group: GitSemverPlugin.GROUP,
-            description: 'Gets the next semantic version'])
+            description: 'Outputs the status of the current changes'])
     }
 
     @TaskAction
@@ -46,21 +46,23 @@ public class GitSemverNextVersionTask extends DefaultTask {
         context.executable = getExecutable(context)
         context.mode = "next"
         context.cmd = createCommand(context)
-        nextVersion = runCommand(context).trim()
-        context.logger.lifecycle("Next version {}", nextVersion)
-        return nextVersion
+        def status = runCommand(context)
+        context.logger.lifecycle(status)
+        return status
     }
 
     def createCommand(def context) {
+        //git status --porcelain=v1 | grep -qE '^(.| )+ +\d+ +'
         def extension = context.extension
         def mode = context.mode
         def commandParts = []
-        commandParts.add(context.executable.getAbsolutePath())
-        commandParts.add(mode)
-        commandParts.add("--stable=" + extension.stable)
-        commandParts.add("-w ")
+        commandParts.add("git")
+        commandParts.add("-C")
         commandParts.add(context.project.projectDir)
+        commandParts.add("status")
+        commandParts.add("--porcelain=v1")
         return commandParts.join(" ")
     }
+        
 
 }
