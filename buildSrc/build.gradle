@@ -4,10 +4,6 @@ repositories {
 
 dependencies {
 
-<<<<<<< HEAD
-  implementation 'org.kohsuke:github-api:1.323'
-=======
->>>>>>> 8efad43 (feat!: Changed the way the tasks are constructed and Github queried)
   implementation 'commons-io:commons-io:2.16.1'
   implementation 'com.jayway.jsonpath:json-path:2.9.0'
   implementation 'org.rauschig:jarchivelib:1.2.0'
