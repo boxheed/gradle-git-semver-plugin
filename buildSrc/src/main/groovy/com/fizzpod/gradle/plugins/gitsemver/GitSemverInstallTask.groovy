@@ -5,18 +5,14 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import groovy.json.*
 import javax.inject.Inject
-import org.apache.commons.lang3.SystemUtils
-import org.apache.commons.io.FileUtils
-import org.kohsuke.github.*
+
 import org.rauschig.jarchivelib.ArchiverFactory
 import org.rauschig.jarchivelib.ArchiveFormat
 import org.rauschig.jarchivelib.CompressionType
 
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
-
 public class GitSemverInstallTask extends DefaultTask {
 
-    public static final String NAME = "installGitSemver"
+    public static final String NAME = "installSemver"
 
     public static final String GITSEMVER_INSTALL_DIR = ".git-semver"
 
@@ -42,130 +38,32 @@ public class GitSemverInstallTask extends DefaultTask {
     def runTask() {
         def extension = project[GitSemverPlugin.NAME]
         def context = [:]
-        context.logger = project.getLogger()
         context.project = project
         context.extension = extension
-        context.logger.info("Getting OS")
-        context.os = getOs(context)
-        context.logger.info("Getting Arch")
-        context.arch = getArch(context)
-        context.logger.info("Getting cache location")
-        context.cache = getCacheLocation(context)
-        context.logger.info("Getting cached binary name")
-        context.cacheBinary = getCacheBinary(context)
-        if(!"latest".equals(context.extension.version) && !context.cacheBinary.exists()){
-            context.logger.info("Getting release")
-            context.release = getRelease(context)
-            context.logger.info("Getting asset")
-            context.asset = getAsset(context)
-            context.logger.info("Getting cache location")
-            context.cache = getCacheLocation(context)
-            context.logger.info("Getting cached binary name")
-            context.cacheBinary = getCacheBinary(context)
-            context.logger.info("Downloading asset")
-            download(context)
-        }
-        context.logger.info("Installing asset")
-        install(context)
+        GitSemverInstallTask.run(context)
     }
 
-    def install(def context) {
-        def version = context.release != null? context.release.getName(): context.extension.version
-        def installFolder = getInstallRoot(context)
-        def gitSemverFile = new File(installFolder, context.cacheBinary.getName())
-        def versionFile = new File(installFolder, 'git-semver.version')
-        def contents = ""
-        if(versionFile.exists()) {
-            contents = versionFile.getText()
-        }
-        if(version.equalsIgnoreCase(contents) && gitSemverFile.exists()) {
-            return
-        }
-
-        FileUtils.copyFile(context.cacheBinary, gitSemverFile)
-        gitSemverFile.setExecutable(true)
-        versionFile.write(version)
-    }
-    def getInstallRoot(def context) {
-        def root = context.project.rootDir
-        return new File(root, GITSEMVER_INSTALL_DIR)
+    static def run = { context ->
+        return Optional.ofNullable(context)
+            .map(x -> GitSemverInstallTask.location(x))
+            .map(x -> GitSemverInstallTask.install(x))
+            .orElseThrow(() -> new RuntimeException("Unable to install git-semver"))
     }
 
-    def getCacheBinary(def context) {
-        def gitSemverBinaryCacheFileName = getBinaryName(context.os, context.arch)
-        return new File(context.cache, gitSemverBinaryCacheFileName)
+    static def install = { x ->
+        def repo = x.extension.repository
+        def arch = x.extension.arch
+        def os = x.extension.os
+        def version = x.extension.version
+        def location = x.location
+        x.binary = GitSemverInstallation.install(repo, arch, os, version, location)
+        return x.binary? x: null
     }
 
-    def getCacheLocation(def context) {
-        def root = context.project.rootDir
-        def gitSemverInstallRoot = new File(root, GITSEMVER_INSTALL_DIR)
-        def release = context.release
-        def version = release != null? release.getName(): context.extension.version
-
-        return new File(gitSemverInstallRoot, ".cache/" + version)
-        //def gitSemverFileName = getBinaryName(version, context.os, context.arch)
-        //def gitSemverFile = new File(gitSemverInstallLocation, gitSemverFileName)
-        //return gitSemverFile
+    static def location = { x ->
+        def projectDir = x.project.rootDir
+        def semverDir = x.extension.location
+        x.location = new File(projectDir, semverDir)
+        return x.location? x: null
     }
-
-    def getRelease(def context) {
-        def extension = context.extension
-        context.logger.info("Looking for git-semver version {}", extension.version)
-        GitHub github = GitHub.connectAnonymously();
-        context.logger.info("Connecting to repository {}", extension.repository)
-        context.logger.info("Connecting to GitHub APi at {}", github.getApiUrl())
-        GHRepository gitSemverRepository = github.getRepository(extension.repository);
-        context.logger.info("Getting latest git-semver release")
-        GHRelease gitSemverRelease = gitSemverRepository.getLatestRelease();
-        //match against requeired release
-        if(!"latest".equalsIgnoreCase(extension.version)) {
-            Iterable<GHRelease> gitSemverReleases = gitSemverRepository.listReleases();
-            gitSemverReleases.forEach(release -> {
-                if(extension.version.equalsIgnoreCase(release.getName())) {
-                    gitSemverRelease = release
-                }
-            });
-        }
-        context.logger.info("git-semver version resolved to {}", gitSemverRelease.getName())
-        return gitSemverRelease
-    }
-
-    def getAsset(def context) {
-        def release = context.release
-        def os = context.os
-        def arch = context.arch
-        //Find the appropriate binary asset
-        Iterable<GHAsset> assets = release.listAssets();
-        //find the appropriate asset
-        GHAsset gitSemverAsset = null;
-        assets.forEach( asset -> {
-            String assetName = asset.getName()
-            if(assetName.contains(os) && assetName.contains(arch)) {
-                gitSemverAsset = asset;
-            }
-        })
-        if(gitSemverAsset == null) {
-            throw new RuntimeException("Unable to find asset for operating system " + os + " and architecture " + arch)
-        }
-        return gitSemverAsset
-    }
-    
-    def download(def context) {
-        def project = context.project
-        def extension = context.extension
-        def buildDir = project.buildDir
-        def asset = context.asset
-        def url = asset.getBrowserDownloadUrl()
-        context.logger.info("git-semver url resolved to {}", url)
-        def gitSemverCacheBinary = context.cacheBinary
-        context.logger.info("Writing git-semver to {}", gitSemverCacheBinary)
-        if(!gitSemverCacheBinary.exists()){
-            FileUtils.copyURLToFile(new URL(url), gitSemverCacheBinary, 120000, 120000)
-            def archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
-            archiver.extract(gitSemverCacheBinary, gitSemverCacheBinary.getParentFile())
-            new File(gitSemverCacheBinary.getParentFile(), 'git-semver').renameTo(gitSemverCacheBinary)
-            gitSemverCacheBinary.setExecutable(true)
-        }
-    }
-
 }

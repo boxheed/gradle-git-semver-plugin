@@ -1,23 +1,9 @@
 package com.fizzpod.gradle.plugins.gitsemver
 
 import org.gradle.api.Project
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
-import groovy.json.*
-import javax.inject.Inject
-import org.apache.commons.lang3.SystemUtils
-import org.apache.commons.io.FileUtils
-import org.kohsuke.github.*
-import groovy.json.JsonSlurper
-import com.jayway.jsonpath.*
-import us.springett.cvss.*
-
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
+//import groovy.json.*
 
 public class GitSemverRunnerTaskHelper {
-
-    private JsonSlurper jsonSlurper = new JsonSlurper()
-
 
     static def getExecutable(def context) {
         context.os = getOs(context)
@@ -28,6 +14,21 @@ public class GitSemverRunnerTaskHelper {
         }
         context.logger.info("Using git-semver: {}", binary)
         return binary
+    }
+
+    static def run = { String command ->
+        def sout = new StringBuilder(), serr = new StringBuilder()
+        def proc = command.execute()
+        proc.waitForProcessOutput(sout, serr)
+        proc.waitFor()
+        def exitValue = proc.exitValue()
+//        context.logger.info("stdout: {}", sout.toString())
+//        context.logger.info("stderr: {}", serr.toString())
+        
+        if(exitValue != 0) {
+            throw new RuntimeException("An error has occured running git-semver. Exit: " + exitValue)
+        }
+        return [exit: exitValue, sout: sout.toString(), serr: serr.toString()]
     }
 
     static def runCommand(def context) {

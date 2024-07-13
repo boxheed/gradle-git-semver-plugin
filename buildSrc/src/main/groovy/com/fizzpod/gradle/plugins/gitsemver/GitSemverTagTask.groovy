@@ -3,18 +3,14 @@ package com.fizzpod.gradle.plugins.gitsemver
 import org.gradle.api.Project
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import groovy.json.*
+//import groovy.json.*
 import javax.inject.Inject
-import org.apache.commons.lang3.SystemUtils
-import org.apache.commons.io.FileUtils
-import org.kohsuke.github.*
 
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
 import static com.fizzpod.gradle.plugins.gitsemver.GitSemverRunnerTaskHelper.*
 
 public class GitSemverTagTask extends DefaultTask {
 
-    public static final String NAME = "semverTag"
+    public static final String NAME = "tagSemver"
 
     private Project project
 

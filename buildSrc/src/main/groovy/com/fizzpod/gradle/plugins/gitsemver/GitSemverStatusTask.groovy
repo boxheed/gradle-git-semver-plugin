@@ -3,13 +3,10 @@ package com.fizzpod.gradle.plugins.gitsemver
 import org.gradle.api.Project
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import groovy.json.*
+//import groovy.json.*
 import javax.inject.Inject
-import org.apache.commons.lang3.SystemUtils
-import org.apache.commons.io.FileUtils
 import org.kohsuke.github.*
 
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
 import static com.fizzpod.gradle.plugins.gitsemver.GitSemverRunnerTaskHelper.*
 
 public class GitSemverStatusTask extends DefaultTask {
@@ -38,30 +35,34 @@ public class GitSemverStatusTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
+
         def extension = project[GitSemverPlugin.NAME]
         def context = [:]
-        context.logger = project.getLogger()
         context.project = project
         context.extension = extension
-        context.executable = getExecutable(context)
-        context.mode = "next"
-        context.cmd = createCommand(context)
-        def status = runCommand(context)
-        context.logger.lifecycle(status)
+        def changes = GitSemverStatusTask.run(context)
+        project.logger.lifecycle(changes)
+    }
+
+    static def run = { context ->
+        def status = Optional.ofNullable(context)
+            .map(x -> GitSemverStatusTask.command(x))
+            .map(x -> GitSemverCurrentVersionTask.execute(x))
+            .map(x -> x.sout.trim())
+            .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
         return status
     }
 
-    def createCommand(def context) {
+    static def command = { x ->
         //git status --porcelain=v1 | grep -qE '^(.| )+ +\d+ +'
-        def extension = context.extension
-        def mode = context.mode
         def commandParts = []
         commandParts.add("git")
         commandParts.add("-C")
-        commandParts.add(context.project.projectDir)
+        commandParts.add(x.project.projectDir)
         commandParts.add("status")
         commandParts.add("--porcelain=v1")
-        return commandParts.join(" ")
+        x.command = commandParts.join(" ")
+        return x
     }
         
 

@@ -3,13 +3,8 @@ package com.fizzpod.gradle.plugins.gitsemver
 import org.gradle.api.Project
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import groovy.json.*
 import javax.inject.Inject
-import org.apache.commons.lang3.SystemUtils
-import org.apache.commons.io.FileUtils
-import org.kohsuke.github.*
 
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
 
 public class GitSemverInstallAllTask extends GitSemverInstallTask {
 
@@ -17,11 +12,11 @@ public class GitSemverInstallAllTask extends GitSemverInstallTask {
 
     private Project project
     private def osArches = [
-        [LINUX, AMD64],
-        [LINUX, ARM64],
-        [MAC, AMD64],
-        [MAC, ARM64],
-        [WINDOWS, AMD64]
+        [OS.Family.LINUX.id, OS.Arch.AMD64.id],
+        [OS.Family.LINUX.id, OS.Arch.ARM64.id],
+        [OS.Family.MAC.id, OS.Arch.AMD64.id],
+        [OS.Family.MAC.id, OS.Arch.ARM64.id],
+        [OS.Family.LINUX.id, OS.Arch.AMD64.id]
     ]
 
     private def currentOs;
