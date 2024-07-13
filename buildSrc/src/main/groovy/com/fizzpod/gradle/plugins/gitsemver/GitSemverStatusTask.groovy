@@ -48,7 +48,7 @@ public class GitSemverStatusTask extends DefaultTask {
         def status = Optional.ofNullable(context)
             .map(x -> GitSemverStatusTask.command(x))
             .map(x -> GitSemverCurrentVersionTask.execute(x))
-            .map(x -> x.sout.trim())
+            .map(x -> {x.sout.trim()})
             .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
         return status
     }
