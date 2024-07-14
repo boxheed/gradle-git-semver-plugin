@@ -7,14 +7,32 @@ import org.codehaus.groovy.reflection.ReflectionUtils
 
 public class Loggy {
 
+    static LogLevel level = LogLevel.DEBUG 
+
     public static log(LogLevel level, String msg, Object... params) {
-        def callingClass = ReflectionUtils.getCallingClass(2)
-        Logging.getLogger(callingClass).log(level, msg, *params)
+        def callingClass = getCallingClass()
+        def logger = Logging.getLogger(callingClass)
+        if(Loggy.level.compareTo(level) <=0 || logger.isEnabled(level)) {
+            params = params? params: []
+            logger.lifecycle(msg, *params)
+        }
     }
 
     public static log(LogLevel level, String msg) {
-        def callingClass = ReflectionUtils.getCallingClass(2)
-        Logging.getLogger(callingClass).log(level, msg)
+        def callingClass = getCallingClass()
+        def logger = Logging.getLogger(callingClass)
+        if(Loggy.level.compareTo(level) <=0 || logger.isEnabled(level) ) {
+            logger.lifecycle(msg)
+        }
+    }
+
+    private static Class<?> getCallingClass() {
+        int stackDepth = 0
+        Class<?> clazz = null
+        do {
+            clazz =  ReflectionUtils.getCallingClass(++stackDepth)
+        } while (!clazz.getName().contains("Loggy") && stackDepth < 5)
+        return clazz
     }
 
     public static info(String msg) {
@@ -59,11 +77,11 @@ public class Loggy {
 
     static def wrap(Closure closure) {
         def entryLog = { args ->
-            Loggy.lifecycle("Entry : {}", args)
+            Loggy.debug("Entry : {}", args)
             return args
         }
         def exitLog = { args ->
-            Loggy.lifecycle("Exit : {}", args)
+            Loggy.debug("Exit : {}", args? args: "null")
             return args
         }
         return entryLog >> closure >> exitLog
