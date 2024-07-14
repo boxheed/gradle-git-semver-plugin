@@ -53,7 +53,10 @@ public class GitSemverStatusTask extends DefaultTask {
         return status
     }
 
-    static def getOut = Loggy.wrap( { x -> x.sout.trim()})
+    static def getOut = Loggy.wrap( { x -> 
+            def out = x.sout? x.sout.trim(): ""
+            return out
+        })
 
     static def command = Loggy.wrap( { x ->
         //git status --porcelain=v1 | grep -qE '^(.| )+ +\d+ +'
