@@ -17,18 +17,21 @@ public class GitSemverRunnerTaskHelper {
     }
 
     static def run = Loggy.wrap({ String command ->
-        def sout = new StringBuilder(), serr = new StringBuilder()
+        def soutBuilder = new StringBuilder(), serrBuilder = new StringBuilder()
         def proc = command.execute()
-        proc.waitForProcessOutput(sout, serr)
+        proc.waitForProcessOutput(soutBuilder, serrBuilder)
         proc.waitFor()
         def exitValue = proc.exitValue()
+        def sout = soutBuilder.toString()? soutBuilder.toString(): ""
+        def serr = serrBuilder.toString()? serrBuilder.toString(): ""
+        
 //        context.logger.info("stdout: {}", sout.toString())
 //        context.logger.info("stderr: {}", serr.toString())
         
         if(exitValue != 0) {
             throw new RuntimeException("An error has occured running git-semver. Exit: " + exitValue)
         }
-        return [exit: exitValue, sout: sout.toString(), serr: serr.toString()]
+        return [exit: exitValue, sout: sout, serr: serr]
     })
 
     static def runCommand(def context) {
