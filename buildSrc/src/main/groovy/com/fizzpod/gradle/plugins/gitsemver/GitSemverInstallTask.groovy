@@ -43,14 +43,14 @@ public class GitSemverInstallTask extends DefaultTask {
         GitSemverInstallTask.run(context)
     }
 
-    static def run = { context ->
+    static def run = Loggy.wrap({ context ->
         return Optional.ofNullable(context)
             .map(x -> GitSemverInstallTask.location(x))
             .map(x -> GitSemverInstallTask.install(x))
             .orElseThrow(() -> new RuntimeException("Unable to install git-semver"))
-    }
+    })
 
-    static def install = { x ->
+    static def install = Loggy.wrap({ x ->
         def repo = x.extension.repository
         def arch = x.extension.arch
         def os = x.extension.os
@@ -58,12 +58,12 @@ public class GitSemverInstallTask extends DefaultTask {
         def location = x.location
         x.binary = GitSemverInstallation.install(repo, arch, os, version, location)
         return x.binary? x: null
-    }
+    })
 
-    static def location = { x ->
+    static def location = Loggy.wrap({ x ->
         def projectDir = x.project.rootDir
         def semverDir = x.extension.location
         x.location = new File(projectDir, semverDir)
         return x.location? x: null
-    }
+    })
 }

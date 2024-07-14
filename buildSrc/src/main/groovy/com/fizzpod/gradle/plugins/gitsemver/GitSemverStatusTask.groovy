@@ -48,23 +48,9 @@ public class GitSemverStatusTask extends DefaultTask {
         def status = Optional.ofNullable(context)
             .map(x -> GitSemverStatusTask.command(x))
             .map(x -> GitSemverCurrentVersionTask.execute(x))
-            .map(x -> {
-                    println(x)
-                    return x
-                })
             .map(x -> {x.sout.trim()})
             .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
         return status
-    }
-
-    static def entryLog = { args ->
-        println("entry" + args)
-        return args
-    }
-
-    static def exitLog = { args ->
-        println("exit" + args)
-        return args
     }
 
     static def command = Loggy.wrap( { x ->

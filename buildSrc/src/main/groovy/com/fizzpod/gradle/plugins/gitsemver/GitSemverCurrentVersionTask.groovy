@@ -52,12 +52,12 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
             .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
     }
 
-    static def execute = { x ->
+    static def execute = Loggy.wrap({ x ->
         x = x + GitSemverRunnerTaskHelper.run(x.command)
         x.sout? x: null
-    }
+    })
     
-    static def command = { x ->
+    static def command = Loggy.wrap({ x ->
         def extension = x.extension
         def mode = x.mode
         def commandParts = []
@@ -67,7 +67,7 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
         commandParts.add(x.project.projectDir)
         x.command = commandParts.join(" ")
         return x
-    }
+    })
         
 
 }
