@@ -57,7 +57,17 @@ public class GitSemverStatusTask extends DefaultTask {
         return status
     }
 
-    static def command = { x ->
+    static def entryLog = { args ->
+        println("entry" + args)
+        return args
+    }
+
+    static def exitLog = { args ->
+        println("exit" + args)
+        return args
+    }
+
+    static def command = Loggy.wrap( { x ->
         //git status --porcelain=v1 | grep -qE '^(.| )+ +\d+ +'
         def commandParts = []
         commandParts.add("git")
@@ -67,7 +77,7 @@ public class GitSemverStatusTask extends DefaultTask {
         commandParts.add("--porcelain=v1")
         x.command = commandParts.join(" ")
         return x
-    }
+    } )
         
 
 }

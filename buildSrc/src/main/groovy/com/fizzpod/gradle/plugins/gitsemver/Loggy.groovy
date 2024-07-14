@@ -57,4 +57,16 @@ public class Loggy {
         log(LogLevel.WARN, msg, *params)
     }
 
+    static def wrap(Closure closure) {
+        def entryLog = { args ->
+            Loggy.lifecycle("Entry : {}", args)
+            return args
+        }
+        def exitLog = { args ->
+            Loggy.lifecycle("Exit : {}", args)
+            return args
+        }
+        return entryLog >> closure >> exitLog
+    }
+
 }
