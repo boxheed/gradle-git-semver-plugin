@@ -54,7 +54,7 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
 
     static def execute = Loggy.wrap({ x ->
         x = x + GitSemverRunnerTaskHelper.run(x.command)
-        x.sout? x: null
+        return x
     })
     
     static def command = Loggy.wrap({ x ->
