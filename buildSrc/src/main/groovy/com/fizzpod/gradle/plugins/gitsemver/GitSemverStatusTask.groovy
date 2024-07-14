@@ -41,14 +41,14 @@ public class GitSemverStatusTask extends DefaultTask {
         context.project = project
         context.extension = extension
         def changes = GitSemverStatusTask.run(context)
-        project.logger.lifecycle(changes)
+        project.logger.lifecycle(changes.sout)
     }
 
     static def run = { context ->
         def status = Optional.ofNullable(context)
             .map(x -> GitSemverStatusTask.command(x))
             .map(x -> GitSemverCurrentVersionTask.execute(x))
-            .map(x -> GitSemverStatusTask.getOut(x))
+            //.map(x -> GitSemverStatusTask.getOut(x))
             .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
         return status
     }
