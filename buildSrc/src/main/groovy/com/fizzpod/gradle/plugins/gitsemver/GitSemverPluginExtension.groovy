@@ -4,6 +4,7 @@ public class GitSemverPluginExtension {
 	def version = "latest"
     def location = ".git-semver"
     def repository = "PSanetra/git-semver"
+    def prefix = "v"
     def os = null
     def arch = null
     def flags = ""
@@ -37,7 +38,7 @@ public class GitSemverPluginExtension {
                 nextVersion =  GitSemverNextVersionTask.run(context)
             }
             def status = statusTask.run(context)
-            if(!status.sout) {
+            if(status.sout != "") {
                 snapshot = true
             } else if (!nextVersion.equals(currentVersion)){
                 snapshot = true
