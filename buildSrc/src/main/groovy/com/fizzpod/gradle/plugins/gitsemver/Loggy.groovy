@@ -31,7 +31,7 @@ public class Loggy {
         Class<?> clazz = null
         do {
             clazz =  ReflectionUtils.getCallingClass(++stackDepth)
-        } while (!clazz.getName().contains("Loggy") && stackDepth < 5)
+        } while (!clazz.getName().contains("Loggy") && stackDepth < 10)
         return clazz
     }
 
