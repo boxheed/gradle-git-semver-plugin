@@ -21,6 +21,7 @@ public class GitSemverTagTask extends DefaultTask {
         this.project = project
     }
 
+
     static register(Project project) {
         project.getLogger().info("Registering task {}", NAME)
         def taskContainer = project.getTasks()
