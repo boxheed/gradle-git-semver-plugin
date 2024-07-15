@@ -68,7 +68,7 @@ public class OS {
         } else {
             os = OS.Family.findByName(name)
         } 
-        //Loggy.info("OS resolved to {}", os)
+        
         return os;
     }.memoize()
 
@@ -79,7 +79,7 @@ public class OS {
         } else {
             arch = OS.Arch.findByName(name)
         } 
-        //Loggy.info("Architecture resolved to {}", arch)
+        
         return arch
     }.memoize()
 

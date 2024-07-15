@@ -7,7 +7,7 @@ import org.codehaus.groovy.reflection.ReflectionUtils
 
 public class Loggy {
 
-    static LogLevel level = LogLevel.LIFECYCLE 
+    static LogLevel level = LogLevel.DEBUG 
 
     public static log(LogLevel level, String msg, Object... params) {
         def callingClass = getCallingClass()
@@ -31,7 +31,7 @@ public class Loggy {
         Class<?> clazz = null
         do {
             clazz =  ReflectionUtils.getCallingClass(++stackDepth)
-        } while (!clazz.getName().contains("Loggy") && stackDepth < 10)
+        } while (clazz.getName().contains("Loggy") && stackDepth < 10)
         return clazz
     }
 
@@ -77,11 +77,25 @@ public class Loggy {
 
     static def wrap(Closure closure) {
         def entryLog = { args ->
-            Loggy.debug("Entry : {}", args)
+            def callingClass = getCallingClass()
+            Loggy.debug("{} Entry : {}", callingClass, args)
             return args
         }
         def exitLog = { args ->
-            Loggy.debug("Exit : {}", args? args: "null")
+            def callingClass = getCallingClass()
+            Loggy.debug("{} Exit : {}", callingClass, args? args: "null")
+            return args
+        }
+        return entryLog >> closure >> exitLog
+    }
+
+    static def wrap(Closure closure, String id) {
+        def entryLog = { args ->
+            Loggy.debug("{} Entry : {}", id, args)
+            return args
+        }
+        def exitLog = { args ->
+            Loggy.debug("{} Exit : {}", id, args? args: "null")
             return args
         }
         return entryLog >> closure >> exitLog

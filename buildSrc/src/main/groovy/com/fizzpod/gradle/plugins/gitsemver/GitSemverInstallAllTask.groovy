@@ -6,9 +6,9 @@ import org.gradle.api.tasks.TaskAction
 import javax.inject.Inject
 
 
-public class GitSemverInstallAllTask extends GitSemverInstallTask {
+public class GitSemverInstallAllTask extends DefaultTask {
 
-    public static final String NAME = "installAllGitSemvers"
+    public static final String NAME = "installAllSemvers"
 
     private Project project
     private def osArches = [
@@ -16,15 +16,11 @@ public class GitSemverInstallAllTask extends GitSemverInstallTask {
         [OS.Family.LINUX.id, OS.Arch.ARM64.id],
         [OS.Family.MAC.id, OS.Arch.AMD64.id],
         [OS.Family.MAC.id, OS.Arch.ARM64.id],
-        [OS.Family.LINUX.id, OS.Arch.AMD64.id]
+        [OS.Family.WINDOWS.id, OS.Arch.AMD64.id]
     ]
-
-    private def currentOs;
-    private def currentArch;
 
     @Inject
     public GitSemverInstallAllTask(Project project) {
-        super(project)
         this.project = project
     }
 
@@ -36,16 +32,22 @@ public class GitSemverInstallAllTask extends GitSemverInstallTask {
             type: GitSemverInstallAllTask,
             dependsOn: [],
             group: GitSemverPlugin.GROUP,
-            description: 'Downloads and installs all osv-scanner binaries'])
+            description: 'Download and install all git-semver binaries'])
     }
 
     @TaskAction
     def runTask() {
+        def extension = project[GitSemverPlugin.NAME]
+        def originalOs = extension.os
+        def originalArch = extension.arch
         for(def osArch: osArches) {
-            currentOs = osArch[0]
-            currentArch = osArch[1]
-            project.getLogger().lifecycle("Installing {} : {}", currentOs, currentArch)
-            super.runTask()
+            extension.os = osArch[0]
+            extension.arch = osArch[1]
+            Loggy.lifecycle("Installing {} : {}", extension.os, extension.arch)
+            def context = [:]
+            context.project = project
+            context.extension = extension
+            GitSemverInstallTask.run(context)
         }
     }
 

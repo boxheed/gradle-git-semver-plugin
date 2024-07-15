@@ -36,32 +36,33 @@ public class GitSemverInstallation {
         return result
     }
 
-    static def download = { x ->
+    static def download = Loggy.wrap({ x ->
         if(!x.binary.exists()) {
-            GitSemverInstallation.downloadAndInstall(x.url, x.binary)
+            GitSemverInstallation.downloadAndInstall(x.url, x.binary, x.os)
         }
         return x.binary.exists()? x: null
-    }
+    })
 
-    static def downloadAndInstall = { url, binary ->
+    static def downloadAndInstall = { url, binary , os ->
         def tmp = new File(binary.getParentFile(), "tmp_" + binary.getName() + ".tgz")
         FileUtils.copyURLToFile(new URL(url), tmp, 120000, 120000)
         def archiver = ArchiverFactory.createArchiver(ArchiveFormat.TAR, CompressionType.GZIP)
         archiver.extract(tmp, binary.getParentFile())
-        new File(binary.getParentFile(), 'git-semver').renameTo(binary)
+        def archiveBinaryName = os == OS.Family.WINDOWS? 'git-semver.exe': 'git-semver'
+        def binaryFromArchive = new File(binary.getParentFile(), archiveBinaryName).renameTo(binary)
         binary.setExecutable(true)
         tmp.delete()
         return binary
     }
 
-    static def bin = { x ->
+    static def bin = Loggy.wrap({ x ->
         def location = x.params.location
         def version = x.version
         def os = x.os
         def arch = x.arch
         x.binary = GitSemverInstallation.binary(location, version, os, arch)
         x.binary? x: null
-    }
+    })
 
     static def binary = {location, version, os, arch ->
         def name = GitSemverInstallation.getBinaryName(version, os, arch)
@@ -77,22 +78,22 @@ public class GitSemverInstallation {
         return name
     }.memoize()
 
-    static def artifact = { x ->
+    static def artifact = Loggy.wrap({ x ->
         x = x + GitSemverInstallation.resolveArtifact(x.params.repo, x.arch, x.os, x.params.version)
-    }
+    })
 
     static def resolveArtifact = { String repo, OS.Arch arch, OS.Family os, String version ->
         def artifact = GitHubClient.resolve(repo, arch, os, version)
         return [url: artifact.url, version: artifact.version]
     }.memoize()
 
-    static def os = {def x ->
+    static def os = Loggy.wrap({def x ->
         x.os = OS.getOs(x.params.os)
         x.os? x: null;
-    }.memoize()
+    }.memoize())
 
-    static def arch = {def x ->
+    static def arch = Loggy.wrap({def x ->
         x.arch = OS.getArch(x.params.arch)
         x.arch? x: null;
-    }.memoize()
+    }.memoize())
 }
