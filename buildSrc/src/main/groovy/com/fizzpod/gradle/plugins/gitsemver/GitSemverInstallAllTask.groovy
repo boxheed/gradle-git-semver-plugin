@@ -3,33 +3,24 @@ package com.fizzpod.gradle.plugins.gitsemver
 import org.gradle.api.Project
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-import groovy.json.*
 import javax.inject.Inject
-import org.apache.commons.lang3.SystemUtils
-import org.apache.commons.io.FileUtils
-import org.kohsuke.github.*
 
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
 
-public class GitSemverInstallAllTask extends GitSemverInstallTask {
+public class GitSemverInstallAllTask extends DefaultTask {
 
-    public static final String NAME = "gitSemverInstallAll"
+    public static final String NAME = "installAllSemvers"
 
     private Project project
     private def osArches = [
-        [LINUX, AMD64],
-        [LINUX, ARM64],
-        [MAC, AMD64],
-        [MAC, ARM64],
-        [WINDOWS, AMD64]
+        [OS.Family.LINUX.id, OS.Arch.AMD64.id],
+        [OS.Family.LINUX.id, OS.Arch.ARM64.id],
+        [OS.Family.MAC.id, OS.Arch.AMD64.id],
+        [OS.Family.MAC.id, OS.Arch.ARM64.id],
+        [OS.Family.WINDOWS.id, OS.Arch.AMD64.id]
     ]
-
-    private def currentOs;
-    private def currentArch;
 
     @Inject
     public GitSemverInstallAllTask(Project project) {
-        super(project)
         this.project = project
     }
 
@@ -41,16 +32,22 @@ public class GitSemverInstallAllTask extends GitSemverInstallTask {
             type: GitSemverInstallAllTask,
             dependsOn: [],
             group: GitSemverPlugin.GROUP,
-            description: 'Downloads and installs all osv-scanner binaries'])
+            description: 'Download and install all git-semver binaries'])
     }
 
     @TaskAction
     def runTask() {
+        def extension = project[GitSemverPlugin.NAME]
+        def originalOs = extension.os
+        def originalArch = extension.arch
         for(def osArch: osArches) {
-            currentOs = osArch[0]
-            currentArch = osArch[1]
-            project.getLogger().lifecycle("Installing {} : {}", currentOs, currentArch)
-            super.runTask()
+            extension.os = osArch[0]
+            extension.arch = osArch[1]
+            Loggy.lifecycle("Installing {} : {}", extension.os, extension.arch)
+            def context = [:]
+            context.project = project
+            context.extension = extension
+            GitSemverInstallTask.run(context)
         }
     }
 

@@ -19,7 +19,14 @@ jobs:
           name: setup
           command: source <(curl -s https://raw.githubusercontent.com/boxheed/shippable-scripts/master/java-build-ci-setup)
       - checkout
-      - run: ./gradlew clean build 
+      - run: ./gradlew clean build && ls ./build/libs
+#      - run: ./gradlew installGitSemver
+#      - run: ./gradlew installAllGitSemvers
+#      - run: ./gradlew gitStatus
+#      - run: ./gradlew currentSemver
+#      - run: ./gradlew nextSemver
+#      - run: ./gradlew properties
+      - run: ./gradlew tagSemver && git tag && ./gradlew clean build && ls ./build/libs
   
   security:
     docker:
@@ -45,8 +52,9 @@ jobs:
           name: setup
           command: source <(curl -s https://raw.githubusercontent.com/boxheed/shippable-scripts/master/java-build-ci-setup)
       - checkout
-#      - run: ./gradlew createRelease
-#      - run: git push --tags
+      - run: ./gradlew clean build
+      - run: ./gradlew tagSemver
+      - run: git push --tags
 
   publish:
     docker:
@@ -62,7 +70,7 @@ jobs:
           name: setup
           command: source <(curl -s https://raw.githubusercontent.com/boxheed/shippable-scripts/master/java-build-ci-setup)
       - checkout
-#      - run: ./gradlew build publish publishPlugins githubRelease
+      - run: ./gradlew build publish publishPlugins githubRelease
 
 workflows:
   build:

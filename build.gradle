@@ -44,6 +44,11 @@ sourceSets {
     }
   }
 }
+gitSemver {
+  stable = false
+}
+
+version = gitSemver.resolve
 
 dependencies {
   api gradleApi()

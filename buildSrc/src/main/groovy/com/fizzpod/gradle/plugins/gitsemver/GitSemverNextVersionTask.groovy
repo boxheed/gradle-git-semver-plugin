@@ -5,18 +5,14 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import groovy.json.*
 import javax.inject.Inject
-import org.apache.commons.lang3.SystemUtils
-import org.apache.commons.io.FileUtils
-import org.kohsuke.github.*
-
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverInstallHelper.*
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverRunnerTaskHelper.*
 
 public class GitSemverNextVersionTask extends DefaultTask {
 
-    public static final String NAME = "gitSemverNext"
+    public static final String NAME = "nextSemver"
 
     private Project project
+
+    private String nextVersion
 
     @Inject
     public GitSemverNextVersionTask(Project project) {
@@ -27,7 +23,7 @@ public class GitSemverNextVersionTask extends DefaultTask {
         project.getLogger().info("Registering task {}", NAME)
         def taskContainer = project.getTasks()
 
-        taskContainer.create([name: NAME,
+        return taskContainer.create([name: NAME,
             type: GitSemverNextVersionTask,
             dependsOn: [],
             group: GitSemverPlugin.GROUP,
@@ -38,26 +34,34 @@ public class GitSemverNextVersionTask extends DefaultTask {
     def runTask() {
         def extension = project[GitSemverPlugin.NAME]
         def context = [:]
-        context.logger = project.getLogger()
         context.project = project
         context.extension = extension
-        context.executable = getExecutable(context)
-        context.mode = "next"
-        context.cmd = createCommand(context)
-        def version = runCommand(context)
-        context.logger.lifecycle("Next version {}", version)
+        def version = GitSemverNextVersionTask.run(context)
+        project.logger.lifecycle(version)
     }
 
-    def createCommand(def context) {
-        def extension = context.extension
-        def mode = context.mode
-        def commandParts = []
-        commandParts.add(context.executable.getAbsolutePath())
-        commandParts.add(mode)
-        commandParts.add("-w ")
-        commandParts.add(context.project.projectDir)
-        return commandParts.join(" ")
+    static def run = { context ->
+        context.mode = "next"
+        def res = Optional.ofNullable(context)
+            .map(x -> GitSemverInstallTask.location(x))
+            .map(x -> GitSemverInstallTask.install(x))
+            .map(x -> GitSemverNextVersionTask.command(x))
+            .map(x -> Command.execute(x))
+            .map(x -> x.sout.trim())
+            .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
     }
-        
+
+    static def command = { x ->
+        def extension = x.extension
+        def mode = x.mode
+        def commandParts = []
+        commandParts.add(x.binary.getAbsolutePath())
+        commandParts.add(mode)
+        commandParts.add("--stable=" + extension.stable)
+        commandParts.add("-w ")
+        commandParts.add(x.project.projectDir)
+        x.command = commandParts.join(" ")
+        return x
+    }
 
 }
