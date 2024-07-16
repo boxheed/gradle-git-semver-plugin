@@ -32,10 +32,10 @@ public class GitSemverPluginExtension {
             def snapshot = false
             installTask.runTask()
             if(this.currentVersion == null) {
-                currentVersion =  GitSemverCurrentVersionTask.run(context)
+                currentVersion = GitSemverCurrentVersionTask.run(context)
             }
             if(this.nextVersion == null) {
-                nextVersion =  GitSemverNextVersionTask.run(context)
+                nextVersion = GitSemverNextVersionTask.run(context)
             }
             def status = statusTask.run(context)
             if(status.sout != "") {
