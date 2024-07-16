@@ -40,7 +40,7 @@ public class GitSemverTagTask extends DefaultTask {
         def tag = GitSemverTagTask.run(context)
         
         if(tag.exit == 0) {
-            Loggy.lifecycle("Tagged repository withs: \n{}", tag.version)
+            Loggy.lifecycle("Tagged repository with: \n{}", tag.version)
         } else {
             Loggy.lifecycle("Failed to tag repository: \n{}\n{}", tag.serr, tag.serr)
             throw new RuntimeException("Unable to tag repository")
@@ -74,7 +74,7 @@ public class GitSemverTagTask extends DefaultTask {
             Loggy.debug("Local repository is clean; nothing to commit")
             x.clean = true
         } else {
-            Loggy.error("Repository isn't clean: \n{}\n{}", x.status.sout, x.status.serr)
+            Loggy.error("Repository is not clean: \n{}\n{}", x.status.sout, x.status.serr)
         }
         x.clean? x: null
     })
