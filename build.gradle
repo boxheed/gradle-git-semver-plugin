@@ -50,6 +50,10 @@ gitSemver {
 
 version = gitSemver.resolve
 
+githubRelease {
+	tagName 'v' + project.version
+}
+
 dependencies {
   api gradleApi()
   api localGroovy()  
