@@ -3,19 +3,13 @@ package com.fizzpod.gradle.plugins.gitsemver
 import org.gradle.api.Project
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
-//import groovy.json.*
 import javax.inject.Inject
-import org.kohsuke.github.*
-
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverRunnerTaskHelper.*
 
 public class GitSemverStatusTask extends DefaultTask {
 
     public static final String NAME = "gitStatus"
 
     private Project project
-
-    private String nextVersion
 
     @Inject
     public GitSemverStatusTask(Project project) {
@@ -51,7 +45,7 @@ public class GitSemverStatusTask extends DefaultTask {
     static def run = { context ->
         def status = Optional.ofNullable(context)
             .map(x -> GitSemverStatusTask.command(x))
-            .map(x -> GitSemverCurrentVersionTask.execute(x))
+            .map(x -> Command.execute(x))
             .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
         return status
     }

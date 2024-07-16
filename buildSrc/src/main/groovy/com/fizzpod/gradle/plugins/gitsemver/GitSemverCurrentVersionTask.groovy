@@ -5,9 +5,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import groovy.json.*
 import javax.inject.Inject
-import org.kohsuke.github.*
-
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverRunnerTaskHelper.*
 
 public class GitSemverCurrentVersionTask extends DefaultTask {
 
@@ -47,16 +44,11 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
             .map(x -> GitSemverInstallTask.location(x))
             .map(x -> GitSemverInstallTask.install(x))
             .map(x -> GitSemverCurrentVersionTask.command(x))
-            .map(x -> GitSemverCurrentVersionTask.execute(x))
+            .map(x -> Command.execute(x))
             .map(x -> x.sout.trim())
             .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
     }
 
-    static def execute = Loggy.wrap({ x ->
-        x = x + GitSemverRunnerTaskHelper.run(x.command)
-        return x
-    })
-    
     static def command = Loggy.wrap({ x ->
         def extension = x.extension
         def mode = x.mode

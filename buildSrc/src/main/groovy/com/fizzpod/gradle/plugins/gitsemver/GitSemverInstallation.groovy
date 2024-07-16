@@ -7,7 +7,6 @@ import groovy.json.*
 import javax.inject.Inject
 import org.apache.commons.lang3.SystemUtils
 import org.apache.commons.io.FileUtils
-import org.kohsuke.github.*
 import org.rauschig.jarchivelib.ArchiverFactory
 import org.rauschig.jarchivelib.ArchiveFormat
 import org.rauschig.jarchivelib.CompressionType

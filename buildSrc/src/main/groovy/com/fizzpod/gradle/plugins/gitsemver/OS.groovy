@@ -19,7 +19,6 @@ public class OS {
             def res = values().find { 
                 it.toString().equalsIgnoreCase(name?.trim()) || it.id.equalsIgnoreCase(name?.trim())
             }
-            println(res)
             return res
         }
 

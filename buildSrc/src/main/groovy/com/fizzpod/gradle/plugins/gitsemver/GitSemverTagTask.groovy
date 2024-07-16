@@ -6,15 +6,12 @@ import org.gradle.api.tasks.TaskAction
 
 import javax.inject.Inject
 
-import static com.fizzpod.gradle.plugins.gitsemver.GitSemverRunnerTaskHelper.*
-
 public class GitSemverTagTask extends DefaultTask {
 
     public static final String NAME = "tagSemver"
 
     private Project project
 
-    private String nextVersion
 
     @Inject
     public GitSemverTagTask(Project project) {
@@ -46,6 +43,7 @@ public class GitSemverTagTask extends DefaultTask {
             Loggy.lifecycle("Tagged repository withs: \n{}", tag.version)
         } else {
             Loggy.lifecycle("Failed to tag repository: \n{}\n{}", tag.serr, tag.serr)
+            throw new RuntimeException("Unable to tag repository")
         }
     }
 
@@ -54,7 +52,7 @@ public class GitSemverTagTask extends DefaultTask {
             .map(x -> GitSemverTagTask.isClean(x))
             .map(x -> GitSemverTagTask.version(x))
             .map(x -> GitSemverTagTask.command(x))
-            .map(x -> GitSemverCurrentVersionTask.execute(x))
+            .map(x -> Command.execute(x))
             .orElseThrow(() -> new RuntimeException("Unable to tag repository"))
         return status
     }
@@ -80,24 +78,6 @@ public class GitSemverTagTask extends DefaultTask {
         x.clean? x: null
     })
 
-/*
-        def extension = project[GitSemverPlugin.NAME]
-        def context = [:]
-        context.logger = project.getLogger()
-        context.project = project
-        context.extension = extension
-        def status = extension.statusTask.runTask()
-        if(status != null && !"".equals(status.trim())) {
-            context.logger.error("Unable to tag repository as local repo is dirty")
-            //throw new RuntimeException("Unable to tag repository as local repo is dirty")
-        }
-        context.version = "v" + extension.nextSemverTask.runTask()
-        context.cmd = createCommand(context)
-        runCommand(context)
-        context.logger.lifecycle("Tagged repository with {}", context.version)
-        
-    }
-*/
     static def command = Loggy.wrap( { x ->
         def extension = x.extension
         def commandParts = []

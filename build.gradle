@@ -45,7 +45,6 @@ sourceSets {
   }
 }
 gitSemver {
-  version = "v1.1.1"
   stable = false
 }
 
