@@ -47,6 +47,8 @@ jobs:
       - checkout
       - run: ./gradlew tagSemver
       - run: git push --tags
+      - run: git checkout develop && git merge --no-ff main 
+      - run: git push --all
 
   publish:
     docker:
