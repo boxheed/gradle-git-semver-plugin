@@ -47,7 +47,7 @@ jobs:
       - checkout
       - run: git config user.email "boxheed@users.noreply.github.com" && git config user.name "boxheed"
       - run: ./gradlew tagSemver
-      - run: git checkout develop && git merge --no-ff main 
+      - run: git checkout develop && git merge main 
       - run: git push --atomic origin main develop --tags
  
   publish:
