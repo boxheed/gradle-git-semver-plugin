@@ -47,6 +47,13 @@ public class GitSemverNextVersionTask extends DefaultTask {
             .map(x -> GitSemverInstallTask.install(x))
             .map(x -> GitSemverNextVersionTask.command(x))
             .map(x -> Command.execute(x))
+            .map(x -> {
+                    if(x.exit == 0) {
+                        return x
+                    }
+                    Loggy.error("Could not determine next version: {}", x.serr)
+                    return null
+                })
             .map(x -> x.sout.trim())
             .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
     }
