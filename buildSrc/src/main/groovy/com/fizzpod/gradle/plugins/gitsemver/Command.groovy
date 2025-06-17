@@ -3,6 +3,7 @@
 package com.fizzpod.gradle.plugins.gitsemver
 
 import org.gradle.api.Project
+import org.apache.commons.io.FileUtils
 
 public class Command {
 
@@ -11,10 +12,10 @@ public class Command {
         return x
     })
 
-    static def run = Loggy.wrap({ String command ->
-        Loggy.debug("command: {}", command)
+    static def runInDir = { String command, File dir -> 
+        Loggy.debug("command: {}, dir: {}", command, dir)
         def soutBuilder = new StringBuilder(), serrBuilder = new StringBuilder()
-        def proc = command.execute()
+        def proc = command.execute([], dir)
         proc.waitForProcessOutput(soutBuilder, serrBuilder)
         proc.waitFor()
         def exitValue = proc.exitValue()
@@ -26,6 +27,10 @@ public class Command {
         Loggy.debug("exit: {}", exitValue)
         
         return [exit: exitValue, sout: sout, serr: serr]
+    }
+
+    static def run = Loggy.wrap({ String command ->
+        return Command.runInDir(command, FileUtils.current())
     })
 
 }
