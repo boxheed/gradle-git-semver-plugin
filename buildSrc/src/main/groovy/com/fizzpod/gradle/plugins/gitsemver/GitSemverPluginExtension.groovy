@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2025 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -19,6 +19,7 @@ public class GitSemverPluginExtension {
     def statusTask = null
     def tagTask = null
     def snapshotSuffix = "-SNAPSHOT"
+    def ttl = 1000 * 60 * 60 * 24
     def stable = true
 
     public class GitSemverVersionResolver {
