@@ -9,7 +9,7 @@ dependencies {
   implementation 'org.rauschig:jarchivelib:1.2.0'
   implementation 'com.squareup.okhttp3:okhttp:5.1.0'
   
-  testImplementation 'com.netflix.nebula:nebula-test:10.6.2'
+  testImplementation 'com.netflix.nebula:nebula-test:11.0.0'
 
   constraints {
     implementation('org.apache.commons:commons-compress') {
