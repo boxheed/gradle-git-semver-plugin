@@ -6,19 +6,19 @@ import org.apache.commons.io.FileUtils
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
-import spock.lang.*
-import spock.util.io.*
+import spock.lang.Specification
+import java.nio.file.Path
 
 class GitSemverPluginSpec extends Specification {
 
 
     @TempDir
-    FileSystemFixture fsFixture
+    Path tempDir
 
     
     def "initialise plugin"() {
         setup:
-            def root = fsFixture.getCurrentPath().toFile()
+            def root = tempDir.toFile()
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
 
         when:
