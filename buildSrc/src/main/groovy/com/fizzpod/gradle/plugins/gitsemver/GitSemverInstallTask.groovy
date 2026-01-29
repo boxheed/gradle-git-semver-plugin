@@ -52,16 +52,16 @@ public class GitSemverInstallTask extends DefaultTask {
     * Find the most recent binary and see if it is within ttl
     */
     static def ttl = { x ->
-        def binary = x.extension.binary
-        if(binary == null || "" == binary || !binary.exists()) {
+        def binary = x.extension.binary.getOrNull()
+        if(binary == null || !binary.exists()) {
             def location = x.location
-            def arch = OS.getArch(x.extension.arch)
-            def os = OS.getOs(x.extension.os)
-            def ttl = x.extension.ttl
+            def arch = OS.getArch(x.extension.arch.getOrNull())
+            def os = OS.getOs(x.extension.os.getOrNull())
+            def ttl = x.extension.ttl.get()
             binary = GitSemverInstallTask.resolveTtl(location, arch, os, ttl)
         }
         if(binary != null && binary.exists()) {
-            x.extension.binary = binary
+            x.extension.binary.set(binary)
             x.binary = binary
         }
         return x
@@ -97,10 +97,10 @@ public class GitSemverInstallTask extends DefaultTask {
     }
 
     static def install = Loggy.wrap({ x ->
-        def repo = x.extension.repository
-        def arch = x.extension.arch
-        def os = x.extension.os
-        def version = x.extension.version
+        def repo = x.extension.repository.get()
+        def arch = x.extension.arch.getOrNull()
+        def os = x.extension.os.getOrNull()
+        def version = x.extension.version.get()
         def location = x.location
         if(!x.binary || !x.binary.exists()) {
             x.binary = GitSemverInstallation.install(repo, arch, os, version, location)
@@ -110,7 +110,7 @@ public class GitSemverInstallTask extends DefaultTask {
 
     static def location = Loggy.wrap({ x ->
         def projectDir = x.project.rootDir
-        def semverDir = x.extension.location
+        def semverDir = x.extension.location.get()
         x.location = new File(projectDir, semverDir)
         return x.location? x: null
     })

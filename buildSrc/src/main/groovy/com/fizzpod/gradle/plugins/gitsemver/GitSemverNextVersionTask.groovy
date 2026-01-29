@@ -66,7 +66,7 @@ public class GitSemverNextVersionTask extends DefaultTask {
         def commandParts = []
         commandParts.add(x.binary.getAbsolutePath())
         commandParts.add(mode)
-        commandParts.add("--stable=" + extension.stable)
+        commandParts.add("--stable=" + extension.stable.get())
         commandParts.add("-w ")
         commandParts.add(x.project.projectDir)
         x.command = commandParts.join(" ")

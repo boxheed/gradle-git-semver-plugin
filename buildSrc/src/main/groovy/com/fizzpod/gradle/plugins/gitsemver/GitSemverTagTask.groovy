@@ -61,7 +61,7 @@ public class GitSemverTagTask extends DefaultTask {
     static def version = Loggy.wrap({ x -> 
         def context = [:]
         context = context + x
-        x.version = x.extension.prefix + GitSemverNextVersionTask.run(context)
+        x.version = x.extension.prefix.get() + GitSemverNextVersionTask.run(context)
         x.version? x: null
     })
 
