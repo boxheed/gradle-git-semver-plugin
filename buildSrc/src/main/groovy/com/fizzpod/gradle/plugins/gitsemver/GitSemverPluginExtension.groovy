@@ -1,10 +1,10 @@
-/* (C) 2024-2025 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
 import javax.inject.Inject
-import org.gradle.api.provider.Property
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 
 public abstract class GitSemverPluginExtension {
 

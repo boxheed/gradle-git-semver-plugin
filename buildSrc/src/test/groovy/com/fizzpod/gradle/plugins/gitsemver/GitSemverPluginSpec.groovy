@@ -1,4 +1,4 @@
-/* (C) 2024-2025 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -73,7 +73,7 @@ class GitSemverPluginSpec extends Specification {
     def "run GitSemverCurrentVersionTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
@@ -89,7 +89,7 @@ class GitSemverPluginSpec extends Specification {
     def "run GitSemverInstallAllTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
@@ -105,7 +105,7 @@ class GitSemverPluginSpec extends Specification {
     def "run GitSemverInstallTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
@@ -121,7 +121,7 @@ class GitSemverPluginSpec extends Specification {
     def "run GitSemverNextVersionTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
@@ -137,7 +137,7 @@ class GitSemverPluginSpec extends Specification {
     def "run GitSemverStatusTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
