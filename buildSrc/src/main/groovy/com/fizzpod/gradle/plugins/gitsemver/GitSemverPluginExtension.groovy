@@ -55,7 +55,7 @@ public abstract class GitSemverPluginExtension {
             installTask.runTask()
             currentVersion = GitSemverCurrentVersionTask.run(context)
             nextVersion = GitSemverNextVersionTask.run(context)
-            def status = statusTask.run(context)
+            def status = statusTask.runGitStatus(context)
             if(status.sout != "") {
                 snapshot = true
             } else if (!nextVersion.equals(currentVersion)){
