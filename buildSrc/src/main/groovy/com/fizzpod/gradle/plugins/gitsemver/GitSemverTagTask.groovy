@@ -69,7 +69,7 @@ public class GitSemverTagTask extends DefaultTask {
         def context = [:]
         context = context + x
         x.clean = false
-        def result = GitSemverStatusTask.run(context)
+        def result = x.extension.statusTask.runGitStatus(context)
         x.status = [exit: result.exit, sout: result.sout, serr: result.serr]
         if(result.exit == 0 && result.sout.trim() == "") {
             Loggy.debug("Local repository is clean; nothing to commit")
