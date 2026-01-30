@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -78,6 +78,37 @@ public class GitSemverInstallation {
         def name = "git-semver_${version}_${osId}_${archId}${extension}"
         return name
     }.memoize()
+
+    static def resolveTtl = {  File location, OS.Arch arch, OS.Family os, long ttl ->
+        def latestBinary = null
+        def currentTime = System.currentTimeMillis()
+        def binaryPattern = GitSemverInstallation.getBinaryName("v?(\\d+\\.\\d+\\.\\d+)", os, arch) + ".*"
+        if (location.exists()) {
+            location.listFiles().each { File file ->
+                if (file.name =~ binaryPattern) {
+                    Loggy.info("Checking ${file.name}")
+                    def lastModified = file.lastModified()
+                    def timeDiff = currentTime - lastModified
+                    if (timeDiff < ttl) { 
+                        Loggy.info("${file.name} within ttl of ${ttl}")
+                        if(latestBinary != null && latestBinary.lastModified() < file.lastModified()) {
+                            latestBinary = file
+                        } else if (latestBinary == null){
+                            latestBinary = file
+                        }
+                    } else {
+                        Loggy.info("${file.name} outide ttl of ${ttl}")
+                    }
+                }
+            }
+        }
+        if(latestBinary == null) {
+            Loggy.info("gitsemver not found")
+        } else {
+            Loggy.info("Using gitsemver ${latestBinary}")
+        }
+        return latestBinary
+    }
 
     static def artifact = Loggy.wrap({ x ->
         x = x + GitSemverInstallation.resolveArtifact(x.params.repo, x.arch, x.os, x.params.version)

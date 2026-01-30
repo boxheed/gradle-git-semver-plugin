@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -13,17 +13,19 @@ public class GitSemverPlugin implements Plugin<Project> {
 
 	void apply(Project project) {
 		GitSemverPluginExtension extension = project.extensions.create(NAME, GitSemverPluginExtension)
-		extension.project = project
 		def installTask = GitSemverInstallTask.register(project)
+        installTask.configure {
+            version.set(extension.version)
+            location.set(extension.location)
+            repository.set(extension.repository)
+            os.set(extension.os)
+            arch.set(extension.arch)
+            ttl.set(extension.ttl)
+        }
 		def installAllTask = GitSemverInstallAllTask.register(project)
 		def currentVersionTask = GitSemverCurrentVersionTask.register(project)
 		def nextVersionTask = GitSemverNextVersionTask.register(project)
 		def statusTask = GitSemverStatusTask.register(project)
 		def tagTask = GitSemverTagTask.register(project)
-		extension.installTask = installTask
-		extension.semverTask = currentVersionTask
-		extension.nextSemverTask = nextVersionTask
-		extension.statusTask = statusTask
-		extension.tagTask = tagTask
 	}
 }

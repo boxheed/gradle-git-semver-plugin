@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -12,11 +12,8 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
 
     public static final String NAME = "semver"
 
-    private Project project
-
     @Inject
-    public GitSemverCurrentVersionTask(Project project) {
-        this.project = project
+    public GitSemverCurrentVersionTask() {
     }
 
     static register(Project project) {
@@ -32,10 +29,21 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def extension = project[GitSemverPlugin.NAME]
+        def extension = project.extensions.getByName(GitSemverPlugin.NAME)
         def context = [:]
-        context.project = project
-        context.extension = extension
+        
+        // For InstallTask
+        context.projectDir = project.rootDir
+        context.semverDir = extension.location.get()
+        context.repository = extension.repository.get()
+        context.version = extension.version.get()
+        context.os = extension.os.getOrNull()
+        context.arch = extension.arch.getOrNull()
+        context.ttl = extension.ttl.get()
+        
+        // For command
+        context.stable = extension.stable.get()
+
         def version = GitSemverCurrentVersionTask.run(context)
         project.logger.lifecycle(version)
     }
@@ -59,13 +67,12 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
     }
 
     static def command = Loggy.wrap({ x ->
-        def extension = x.extension
         def mode = x.mode
         def commandParts = []
         commandParts.add(x.binary.getAbsolutePath())
         commandParts.add(mode)
         commandParts.add("-w ")
-        commandParts.add(x.project.projectDir)
+        commandParts.add(x.projectDir)
         x.command = commandParts.join(" ")
         return x
     })

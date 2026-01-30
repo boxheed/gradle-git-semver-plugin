@@ -34,8 +34,17 @@ public abstract class GitSemverValueSource implements ValueSource<String, GitSem
         def semverDirName = params.getSemverDir().get()
         def location = new File(projectDir, semverDirName)
 
+        // Check if any binary exists within ttl
+        def arch = OS.getArch(params.getArch().getOrNull())
+        def os = OS.getOs(params.getOs().getOrNull())
+        def ttl = params.getTtl().get()
+        def binary = GitSemverInstallation.resolveTtl(location, arch, os, ttl)
+
         // Install if needed
-        def binary = install(location, params)
+        if (binary == null) {
+            binary = install(location, params)
+        }
+        
         if (binary == null) {
             // Fallback or error?
             // If we can't install, we can't determine version.

@@ -11,12 +11,8 @@ public class GitSemverTagTask extends DefaultTask {
 
     public static final String NAME = "tagSemver"
 
-    private Project project
-
-
     @Inject
-    public GitSemverTagTask(Project project) {
-        this.project = project
+    public GitSemverTagTask() {
     }
 
 
@@ -34,10 +30,22 @@ public class GitSemverTagTask extends DefaultTask {
     @TaskAction
     def runTask() {
 
-        def extension = project[GitSemverPlugin.NAME]
-        def context = [:]
-        context.project = project
-        context.extension = extension
+        def extension = project.extensions.getByName(GitSemverPlugin.NAME)
+        def context = [: ]
+        
+        // For InstallTask and NextVersionTask
+        context.projectDir = project.rootDir
+        context.semverDir = extension.location.get()
+        context.repository = extension.repository.get()
+        context.version = extension.version.get()
+        context.os = extension.os.getOrNull()
+        context.arch = extension.arch.getOrNull()
+        context.ttl = extension.ttl.get()
+        context.stable = extension.stable.get()
+
+        // For TagTask
+        context.prefix = extension.prefix.get()
+
         def tag = GitSemverTagTask.run(context)
         
         if(tag.exit == 0) {
@@ -59,17 +67,17 @@ public class GitSemverTagTask extends DefaultTask {
     }
 
     static def version = Loggy.wrap({ x -> 
-        def context = [:]
+        def context = [: ]
         context = context + x
-        x.version = x.extension.prefix.get() + GitSemverNextVersionTask.run(context)
+        x.version = x.prefix + GitSemverNextVersionTask.run(context)
         x.version? x: null
     })
 
     static def isClean = Loggy.wrap({ x -> 
-        def context = [:]
+        def context = [: ]
         context = context + x
         x.clean = false
-        def result = x.extension.statusTask.runGitStatus(context)
+        def result = Command.runInDir("git status --porcelain=v1", x.projectDir)
         x.status = [exit: result.exit, sout: result.sout, serr: result.serr]
         if(result.exit == 0 && result.sout.trim() == "") {
             Loggy.debug("Local repository is clean; nothing to commit")
@@ -81,11 +89,10 @@ public class GitSemverTagTask extends DefaultTask {
     })
 
     static def command = Loggy.wrap( { x ->
-        def extension = x.extension
         def commandParts = []
         commandParts.add("git")
         commandParts.add("-C")
-        commandParts.add(x.project.projectDir)
+        commandParts.add(x.projectDir)
         commandParts.add("tag")
         commandParts.add(x.version)
         x.command = commandParts.join(" ")

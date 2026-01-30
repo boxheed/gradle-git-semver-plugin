@@ -31,25 +31,23 @@ public class GitSemverStatusTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-
-        def extension = project[GitSemverPlugin.NAME]
+        // No need for extension here as we just run git status
         def context = [:]
-        context.project = project
-        context.extension = extension
+        context.projectDir = project.rootDir
         def changes = this.runGitStatus(context)
         if(changes.exit == 0) {
             Loggy.lifecycle("Git status: \n{}", changes.sout? changes.sout: "No Changes")
         } else {
-            Loggy.lifecycle("Git status error: \n{}\n{}", changes.serr, changes.serr)
+            Loggy.lifecycle("Git status error: \n{}\n", changes.serr, changes.serr)
         }
     }
 
     def runGitStatus(Map context) {
-        Loggy.debug("command: {}, dir: {}", "git status --porcelain=v1", context.project.projectDir)
+        Loggy.debug("command: {}, dir: {}", "git status --porcelain=v1", context.projectDir)
         def stdout = new ByteArrayOutputStream()
         def stderr = new ByteArrayOutputStream()
         def result = execOperations.exec {
-            workingDir context.project.projectDir
+            workingDir context.projectDir
             commandLine 'git', 'status', '--porcelain=v1'
             standardOutput = stdout
             errorOutput = stderr

@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -12,7 +12,6 @@ public class GitSemverInstallAllTask extends DefaultTask {
 
     public static final String NAME = "installAllSemvers"
 
-    private Project project
     private def osArches = [
         [OS.Family.LINUX.id, OS.Arch.AMD64.id],
         [OS.Family.LINUX.id, OS.Arch.ARM64.id],
@@ -22,8 +21,7 @@ public class GitSemverInstallAllTask extends DefaultTask {
     ]
 
     @Inject
-    public GitSemverInstallAllTask(Project project) {
-        this.project = project
+    public GitSemverInstallAllTask() {
     }
 
     static register(Project project) {
@@ -39,37 +37,23 @@ public class GitSemverInstallAllTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def extension = project[GitSemverPlugin.NAME]
-        def originalOs = extension.os
-        def originalArch = extension.arch
+        def extension = project.extensions.getByName(GitSemverPlugin.NAME)
+        
         for(def osArch: osArches) {
-            extension.os = osArch[0]
-            extension.arch = osArch[1]
-            Loggy.lifecycle("Installing {} : {}", extension.os, extension.arch)
+            def osVal = osArch[0]
+            def archVal = osArch[1]
+            Loggy.lifecycle("Installing {} : {}", osVal, archVal)
             def context = [:]
-            context.project = project
-            context.extension = extension
+            context.projectDir = project.rootDir
+            context.semverDir = extension.location.get()
+            context.repository = extension.repository.get()
+            context.version = extension.version.get()
+            context.os = osVal
+            context.arch = archVal
+            context.ttl = extension.ttl.get()
+            
             GitSemverInstallTask.run(context)
         }
     }
-
-    def getAsset(def context) {
-        context.os = currentOs
-        context.arch = currentArch
-        return super.getAsset(context)
-    }
-    
-    def install(def context) {
-        context.os = currentOs
-        context.arch = currentArch
-        super.install(context)
-    }
-    
-    def download(def context) {
-        context.os = currentOs
-        context.arch = currentArch
-        super.download(context)
-    }
-    
 
 }

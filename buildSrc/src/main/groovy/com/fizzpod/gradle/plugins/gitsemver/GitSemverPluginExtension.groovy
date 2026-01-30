@@ -27,15 +27,7 @@ public abstract class GitSemverPluginExtension {
     // New provider
     abstract Property<String> getComputedVersion()
 
-    def project = null
     def resolve = new GitSemverVersionResolver()
-
-    // Tasks
-    def installTask = null
-    def semverTask = null
-    def nextSemverTask = null
-    def statusTask = null
-    def tagTask = null
 
     @Inject
     public GitSemverPluginExtension(ObjectFactory objects, ProviderFactory providers, ProjectLayout layout) {
