@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -12,13 +12,8 @@ public class GitSemverNextVersionTask extends DefaultTask {
 
     public static final String NAME = "nextSemver"
 
-    private Project project
-
-    private String nextVersion
-
     @Inject
-    public GitSemverNextVersionTask(Project project) {
-        this.project = project
+    public GitSemverNextVersionTask() {
     }
 
     static register(Project project) {
@@ -34,10 +29,22 @@ public class GitSemverNextVersionTask extends DefaultTask {
 
     @TaskAction
     def runTask() {
-        def extension = project[GitSemverPlugin.NAME]
+        def extension = project.extensions.getByName(GitSemverPlugin.NAME)
         def context = [:]
-        context.project = project
-        context.extension = extension
+        
+        // For InstallTask
+        context.projectDir = project.rootDir
+        context.semverDir = extension.location.get()
+        context.repository = extension.repository.get()
+        context.version = extension.version.get()
+        context.os = extension.os.getOrNull()
+        context.arch = extension.arch.getOrNull()
+        context.ttl = extension.ttl.get()
+        // context.binary = extension.binary.getOrNull() // Option to use cached binary if valid
+
+        // For command
+        context.stable = extension.stable.get()
+        
         def version = GitSemverNextVersionTask.run(context)
         project.logger.lifecycle(version)
     }
@@ -61,14 +68,13 @@ public class GitSemverNextVersionTask extends DefaultTask {
     }
 
     static def command = { x ->
-        def extension = x.extension
         def mode = x.mode
         def commandParts = []
         commandParts.add(x.binary.getAbsolutePath())
         commandParts.add(mode)
-        commandParts.add("--stable=" + extension.stable)
+        commandParts.add("--stable=" + x.stable)
         commandParts.add("-w ")
-        commandParts.add(x.project.projectDir)
+        commandParts.add(x.projectDir)
         x.command = commandParts.join(" ")
         return x
     }

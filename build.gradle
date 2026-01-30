@@ -9,7 +9,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath ('com.fizzpod:gradle-plugin-opinion:24.0.1') {
+    classpath ('com.fizzpod:gradle-plugin-opinion:24.2.2') {
       exclude group: 'com.fizzpod', module: 'gradle-git-semver-plugin'
     }
   }
@@ -64,4 +64,49 @@ gradlePlugin {
       implementationClass = 'com.fizzpod.gradle.plugins.gitsemver.GitSemverPlugin'
     }
   }
+}
+
+def isCI = System.getenv('CI') != null
+
+develocity {
+    buildScan {
+        termsOfUseUrl = 'https://gradle.com/help/legal-terms-of-use'
+        termsOfUseAgree = 'yes'
+        publishing.onlyIf { isCI }
+    }
+}
+
+lefthook {
+  
+  autoInstall = ! System.getenv('CI') != null
+  config =
+    [
+      "assert_lefthook_installed": true,
+      "pre-commit": [
+        "follow": true,
+        "commands": [
+          "spotless": [
+            "glob": "*",
+            "run": "./gradlew spotlessCheck"
+          ],
+          "osv": [
+            "glob": "*.{groovy,java,gradle}",
+            "run": "./gradlew osvInstall osvLockAndScan"
+          ],
+          "test": [
+            "glob": "*.{groovy,java}",
+            "run": "./gradlew test"
+          ]
+        ]
+      ],
+      "commit-msg": [
+        "follow": true,
+        "scripts": [
+          {install "https://raw.githubusercontent.com/joaobsjunior/sh-conventional-commits/16dbdae09db941718750db62d4fdbd737da7784e/commit-msg"}: [
+            "runner": "bash"
+          ]
+        ]
+      ]
+    ]
+  
 }

@@ -1,4 +1,4 @@
-/* (C) 2024-2025 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -31,10 +31,52 @@ class GitSemverPluginSpec extends Specification {
             project.getExtensions().findByName(GitSemverPlugin.NAME) != null
     }
 
+    def "verify extension properties"() {
+        setup:
+            def root = fsFixture.getCurrentPath().toFile()
+            Project project = ProjectBuilder.builder().withProjectDir(root).build()
+
+        when:
+            def plugin = new GitSemverPlugin()
+            plugin.apply(project)
+            def extension = project.extensions.getByName(GitSemverPlugin.NAME)
+
+        then:
+            extension.version instanceof org.gradle.api.provider.Property
+            extension.version.get() == "latest"
+
+            extension.location instanceof org.gradle.api.provider.Property
+            extension.location.get() == ".git-semver"
+
+            extension.repository instanceof org.gradle.api.provider.Property
+            extension.repository.get() == "PSanetra/git-semver"
+
+            extension.prefix instanceof org.gradle.api.provider.Property
+            extension.prefix.get() == "v"
+
+            extension.flags instanceof org.gradle.api.provider.Property
+            extension.flags.get() == ""
+
+            extension.snapshotSuffix instanceof org.gradle.api.provider.Property
+            extension.snapshotSuffix.get() == "-SNAPSHOT"
+
+            extension.ttl instanceof org.gradle.api.provider.Property
+            extension.ttl.get() == 1000 * 60 * 60 * 24L
+
+            extension.stable instanceof org.gradle.api.provider.Property
+            extension.stable.get() == true
+
+            extension.binary instanceof org.gradle.api.provider.Property
+            !extension.binary.isPresent()
+    }
+
     def "run GitSemverCurrentVersionTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            Command.runInDir("git init", root)
+            Command.runInDir("git config user.email \"you@example.com\"", root)
+            Command.runInDir("git config user.name \"Your Name\"", root)
+            Command.runInDir("git commit --allow-empty -m \"initial\"", root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
@@ -50,7 +92,10 @@ class GitSemverPluginSpec extends Specification {
     def "run GitSemverInstallAllTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            Command.runInDir("git init", root)
+            Command.runInDir("git config user.email \"you@example.com\"", root)
+            Command.runInDir("git config user.name \"Your Name\"", root)
+            Command.runInDir("git commit --allow-empty -m \"initial\"", root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
@@ -66,7 +111,10 @@ class GitSemverPluginSpec extends Specification {
     def "run GitSemverInstallTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            Command.runInDir("git init", root)
+            Command.runInDir("git config user.email \"you@example.com\"", root)
+            Command.runInDir("git config user.name \"Your Name\"", root)
+            Command.runInDir("git commit --allow-empty -m \"initial\"", root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
@@ -82,7 +130,10 @@ class GitSemverPluginSpec extends Specification {
     def "run GitSemverNextVersionTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            Command.runInDir("git init", root)
+            Command.runInDir("git config user.email \"you@example.com\"", root)
+            Command.runInDir("git config user.name \"Your Name\"", root)
+            Command.runInDir("git commit --allow-empty -m \"initial\"", root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
@@ -98,7 +149,10 @@ class GitSemverPluginSpec extends Specification {
     def "run GitSemverStatusTask"() {
         setup:
             def root = fsFixture.getCurrentPath().toFile()
-            FileUtils.copyDirectoryToDirectory(new File(FileUtils.current(), '.git'), root);
+            Command.runInDir("git init", root)
+            Command.runInDir("git config user.email \"you@example.com\"", root)
+            Command.runInDir("git config user.name \"Your Name\"", root)
+            Command.runInDir("git commit --allow-empty -m \"initial\"", root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
             
         when:
