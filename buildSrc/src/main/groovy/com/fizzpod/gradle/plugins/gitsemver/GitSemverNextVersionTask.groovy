@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -66,7 +66,7 @@ public class GitSemverNextVersionTask extends DefaultTask {
         def commandParts = []
         commandParts.add(x.binary.getAbsolutePath())
         commandParts.add(mode)
-        commandParts.add("--stable=" + extension.stable)
+        commandParts.add("--stable=" + extension.stable.get())
         commandParts.add("-w ")
         commandParts.add(x.project.projectDir)
         x.command = commandParts.join(" ")

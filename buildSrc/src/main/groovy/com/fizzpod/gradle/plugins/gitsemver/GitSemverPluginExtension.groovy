@@ -1,16 +1,22 @@
-/* (C) 2024-2025 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
-public class GitSemverPluginExtension {
-	def version = "latest"
-    def location = ".git-semver"
-    def repository = "PSanetra/git-semver"
-    def prefix = "v"
-    def os = null
-    def arch = null
-    def flags = ""
-    def binary = ""
+import javax.inject.Inject
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
+
+public abstract class GitSemverPluginExtension {
+
+    abstract Property<String> getVersion()
+    abstract Property<String> getLocation()
+    abstract Property<String> getRepository()
+    abstract Property<String> getPrefix()
+    abstract Property<String> getOs()
+    abstract Property<String> getArch()
+    abstract Property<String> getFlags()
+    abstract Property<File> getBinary()
+
     def project = null
     def resolve = new GitSemverVersionResolver()
     def installTask = null
@@ -18,9 +24,22 @@ public class GitSemverPluginExtension {
     def nextSemverTask = null
     def statusTask = null
     def tagTask = null
-    def snapshotSuffix = "-SNAPSHOT"
-    def ttl = 1000 * 60 * 60 * 24
-    def stable = true
+
+    abstract Property<String> getSnapshotSuffix()
+    abstract Property<Long> getTtl()
+    abstract Property<Boolean> getStable()
+
+    @Inject
+    public GitSemverPluginExtension(ObjectFactory objects) {
+        getVersion().convention("latest")
+        getLocation().convention(".git-semver")
+        getRepository().convention("PSanetra/git-semver")
+        getPrefix().convention("v")
+        getFlags().convention("")
+        getSnapshotSuffix().convention("-SNAPSHOT")
+        getTtl().convention(1000 * 60 * 60 * 24L)
+        getStable().convention(true)
+    }
 
     public class GitSemverVersionResolver {
 
@@ -43,7 +62,7 @@ public class GitSemverPluginExtension {
                 snapshot = true
             }
 
-            return snapshot? nextVersion + snapshotSuffix: nextVersion
+            return snapshot? nextVersion + extension.snapshotSuffix.get(): nextVersion
 
         }
     }
