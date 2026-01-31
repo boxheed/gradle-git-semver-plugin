@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -43,6 +43,7 @@ public class GitSemverInstallationSpec extends ProjectSpec {
         where:
         repoName              | osType          | archType      | version  | ghVersion
         "PSanetra/git-semver" | OS.Family.LINUX | OS.Arch.AMD64 | "latest" | "v1.1.1"
+        "https://github.com/PSanetra/git-semver" | OS.Family.LINUX | OS.Arch.AMD64 | "latest" | "v1.1.1"
     }
 
 

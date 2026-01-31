@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -54,7 +54,13 @@ public class GitHubClient {
             .build()
         MediaType mediaType = MediaType.parse("application/vnd.github+json")
         //TODO allow full URL
-        
+        if (repo.startsWith("http")) {
+            def matcher = repo =~ /https?:\/\/[^\/]+\/([^\/]+\/[^\/]+?)(?:\.git)?$/
+            if (matcher) {
+                repo = matcher[0][1]
+            }
+        }
+
         def url = "https://api.github.com/repos/${repo}/releases/latest"
         if(version != "latest") {
             url = "https://api.github.com/repos/${repo}/releases/tags/${version}"
