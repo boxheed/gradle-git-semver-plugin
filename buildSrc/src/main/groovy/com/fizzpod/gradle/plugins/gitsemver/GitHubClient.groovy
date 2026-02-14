@@ -47,12 +47,14 @@ public class GitHubClient {
         x.release? x: null
     }
 
-    static def getRelease = { repo, version ->
- 
-        OkHttpClient okclient = new OkHttpClient()
+    private static final OkHttpClient okclient = new OkHttpClient()
             .newBuilder()
             .build()
-        MediaType mediaType = MediaType.parse("application/vnd.github+json")
+
+    private static final String GITHUB_MEDIA_TYPE = "application/vnd.github+json"
+
+    static def getRelease = { repo, version ->
+
         //TODO allow full URL
         if (repo.startsWith("http")) {
             def matcher = repo =~ /https?:\/\/[^\/]+\/([^\/]+\/[^\/]+?)(?:\.git)?$/
@@ -67,7 +69,7 @@ public class GitHubClient {
         }
         Request request = new Request.Builder()
             .url(url)
-            .addHeader("Accept", "application/vnd.github+json")
+            .addHeader("Accept", GITHUB_MEDIA_TYPE)
             .addHeader("X-GitHub-Api-Version", "2022-11-28")
             .build()
         def result = null
