@@ -51,6 +51,8 @@ public class GitHubClient {
             .newBuilder()
             .build()
 
+    private static final String GITHUB_MEDIA_TYPE = "application/vnd.github+json"
+
     static def getRelease = { repo, version ->
 
         //TODO allow full URL
@@ -67,7 +69,7 @@ public class GitHubClient {
         }
         Request request = new Request.Builder()
             .url(url)
-            .addHeader("Accept", "application/vnd.github+json")
+            .addHeader("Accept", GITHUB_MEDIA_TYPE)
             .addHeader("X-GitHub-Api-Version", "2022-11-28")
             .build()
         def result = null
