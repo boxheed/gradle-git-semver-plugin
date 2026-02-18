@@ -8,7 +8,11 @@ import org.apache.commons.io.FileUtils
 public class Command {
 
     static def execute = Loggy.wrap({ Map<?,?> x ->
-        x = x + Command.run(x.command)
+        if (x.projectDir) {
+             x = x + Command.runInDir(x.command, x.projectDir instanceof File ? x.projectDir : new File(x.projectDir.toString()))
+        } else {
+             x = x + Command.run(x.command)
+        }
         return x
     })
 
@@ -30,7 +34,7 @@ public class Command {
     }
 
     static def run = Loggy.wrap({ String command ->
-        return Command.runInDir(command, FileUtils.current())
+        return Command.runInDir(command, new File("."))
     })
 
 }
