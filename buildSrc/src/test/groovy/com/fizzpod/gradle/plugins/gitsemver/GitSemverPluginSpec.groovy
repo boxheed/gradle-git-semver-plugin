@@ -180,15 +180,14 @@ class GitSemverPluginSpec extends Specification {
             println(res)
             res = Command.runInDir("git config user.name \"Your Name\"", root)
             println(res)
+            mockGitSemver(root, "1.2.3")
+            def gitignore = new File(root, ".gitignore")
+            gitignore.text = ".git-semver/\n"
             res = Command.runInDir("git add -A", root)
             println(res)
             res = Command.runInDir("git commit -m \"initial\"", root)
             println(res)
             res = Command.runInDir("ls -altr", root)
-            mockGitSemver(root, "1.2.3")
-            Command.runInDir("echo .git-semver >> .gitignore", root)
-            Command.runInDir("git add .gitignore", root)
-            Command.runInDir("git commit -m 'ignore .git-semver'", root)
 
         when:
             def plugin = new GitSemverPlugin()
