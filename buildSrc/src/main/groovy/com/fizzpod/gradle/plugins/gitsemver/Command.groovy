@@ -2,8 +2,8 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
-import org.gradle.api.Project
 import org.apache.commons.io.FileUtils
+import org.gradle.api.Project
 
 public class Command {
 
