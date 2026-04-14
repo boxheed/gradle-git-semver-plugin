@@ -6,6 +6,7 @@ import groovy.json.*
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 
@@ -13,6 +14,9 @@ import org.gradle.api.tasks.UntrackedTask
 public class GitSemverCurrentVersionTask extends DefaultTask {
 
     public static final String NAME = "semver"
+
+    @Internal
+    String currentVersion
 
     @Inject
     public GitSemverCurrentVersionTask() {
@@ -47,6 +51,7 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
         context.stable = extension.stable.get()
 
         def version = GitSemverCurrentVersionTask.run(context)
+        this.currentVersion = version
         project.logger.lifecycle(version)
     }
 
@@ -54,6 +59,7 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
         context.mode = "latest"
         def res = Optional.ofNullable(context)
             .map(x -> GitSemverInstallTask.location(x))
+            .map(x -> GitSemverInstallTask.ttl(x))
             .map(x -> GitSemverInstallTask.install(x))
             .map(x -> GitSemverCurrentVersionTask.command(x))
             .map(x -> Command.execute(x))

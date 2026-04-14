@@ -78,6 +78,7 @@ class GitSemverPluginSpec extends Specification {
             Command.runInDir("git config user.name \"Your Name\"", root)
             Command.runInDir("git commit --allow-empty -m \"initial\"", root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
+            mockGitSemver(root, "1.2.3")
             
         when:
             def plugin = new GitSemverPlugin()
@@ -85,8 +86,8 @@ class GitSemverPluginSpec extends Specification {
             def task = project.getTasksByName(GitSemverCurrentVersionTask.NAME, false).iterator().next()
             task.runTask()
         then: 
-            //TODO proper assertion
             !project.getTasksByName(GitSemverCurrentVersionTask.NAME, false).isEmpty()
+            task.currentVersion == "1.2.3"
     }
 
     def "run GitSemverInstallAllTask"() {
@@ -97,6 +98,7 @@ class GitSemverPluginSpec extends Specification {
             Command.runInDir("git config user.name \"Your Name\"", root)
             Command.runInDir("git commit --allow-empty -m \"initial\"", root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
+            mockGitSemver(root, "1.2.3")
             
         when:
             def plugin = new GitSemverPlugin()
@@ -104,7 +106,6 @@ class GitSemverPluginSpec extends Specification {
             def task = project.getTasksByName(GitSemverInstallAllTask.NAME, false).iterator().next()
             task.runTask()
         then: 
-            //TODO proper assertion
             !project.getTasksByName(GitSemverInstallAllTask.NAME, false).isEmpty()
     }
 
@@ -116,6 +117,7 @@ class GitSemverPluginSpec extends Specification {
             Command.runInDir("git config user.name \"Your Name\"", root)
             Command.runInDir("git commit --allow-empty -m \"initial\"", root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
+            mockGitSemver(root, "1.2.3")
             
         when:
             def plugin = new GitSemverPlugin()
@@ -123,7 +125,6 @@ class GitSemverPluginSpec extends Specification {
             def task = project.getTasksByName(GitSemverInstallTask.NAME, false).iterator().next()
             task.runTask()
         then: 
-            //TODO proper assertion
             !project.getTasksByName(GitSemverInstallTask.NAME, false).isEmpty()
     }
 
@@ -135,6 +136,7 @@ class GitSemverPluginSpec extends Specification {
             Command.runInDir("git config user.name \"Your Name\"", root)
             Command.runInDir("git commit --allow-empty -m \"initial\"", root)
             Project project = ProjectBuilder.builder().withProjectDir(root).build()
+            mockGitSemver(root, "1.2.3")
             
         when:
             def plugin = new GitSemverPlugin()
@@ -142,7 +144,6 @@ class GitSemverPluginSpec extends Specification {
             def task = project.getTasksByName(GitSemverNextVersionTask.NAME, false).iterator().next()
             task.runTask()
         then: 
-            //TODO proper assertion
             !project.getTasksByName(GitSemverNextVersionTask.NAME, false).isEmpty()
     }
 
@@ -161,7 +162,6 @@ class GitSemverPluginSpec extends Specification {
             def task = project.getTasksByName(GitSemverStatusTask.NAME, false).iterator().next()
             task.runTask()
         then: 
-            //TODO proper assertion
             !project.getTasksByName(GitSemverStatusTask.NAME, false).isEmpty()
     }
 
@@ -180,19 +180,39 @@ class GitSemverPluginSpec extends Specification {
             println(res)
             res = Command.runInDir("git config user.name \"Your Name\"", root)
             println(res)
+            mockGitSemver(root, "1.2.3")
+            def gitignore = new File(root, ".gitignore")
+            gitignore.text = ".git-semver/\n"
             res = Command.runInDir("git add -A", root)
             println(res)
             res = Command.runInDir("git commit -m \"initial\"", root)
             println(res)
             res = Command.runInDir("ls -altr", root)
+
         when:
             def plugin = new GitSemverPlugin()
             plugin.apply(project)
             def task = project.getTasksByName(GitSemverTagTask.NAME, false).iterator().next()
             task.runTask()
         then: 
-            //TODO proper assertion
             !project.getTasksByName(GitSemverTagTask.NAME, false).isEmpty()
+    }
+
+    private void mockGitSemver(File root, String version) {
+        def os = OS.getOs("current")
+        def arch = OS.getArch("current")
+        def binName = GitSemverInstallation.getBinaryName(version, os, arch)
+        def binDir = new File(root, ".git-semver")
+        binDir.mkdirs()
+        def binFile = new File(binDir, binName)
+
+        if (os == OS.Family.WINDOWS) {
+             // For Windows, creating a mock executable is harder.
+             // We'll skip for now.
+        } else {
+             binFile.text = "#!/bin/sh\necho ${version}\n"
+             binFile.setExecutable(true)
+        }
     }
 
 }
