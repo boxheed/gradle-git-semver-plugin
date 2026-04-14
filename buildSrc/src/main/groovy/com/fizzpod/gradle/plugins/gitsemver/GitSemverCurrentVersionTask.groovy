@@ -8,8 +8,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.UntrackedTask
 
-
+@UntrackedTask(because = "This task requires git-semver execution output")
 public class GitSemverCurrentVersionTask extends DefaultTask {
 
     public static final String NAME = "semver"
