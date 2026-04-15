@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -47,21 +47,29 @@ public class GitHubClient {
         x.release? x: null
     }
 
-    static def getRelease = { repo, version ->
- 
-        OkHttpClient okclient = new OkHttpClient()
+    private static final OkHttpClient okclient = new OkHttpClient()
             .newBuilder()
             .build()
-        MediaType mediaType = MediaType.parse("application/vnd.github+json")
+
+    private static final String GITHUB_MEDIA_TYPE = "application/vnd.github+json"
+
+    static def getRelease = { repo, version ->
+
         //TODO allow full URL
-        
+        if (repo.startsWith("http")) {
+            def matcher = repo =~ /https?:\/\/[^\/]+\/([^\/]+\/[^\/]+?)(?:\.git)?$/
+            if (matcher) {
+                repo = matcher[0][1]
+            }
+        }
+
         def url = "https://api.github.com/repos/${repo}/releases/latest"
         if(version != "latest") {
             url = "https://api.github.com/repos/${repo}/releases/tags/${version}"
         }
         Request request = new Request.Builder()
             .url(url)
-            .addHeader("Accept", "application/vnd.github+json")
+            .addHeader("Accept", GITHUB_MEDIA_TYPE)
             .addHeader("X-GitHub-Api-Version", "2022-11-28")
             .build()
         def result = null

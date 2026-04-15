@@ -83,9 +83,10 @@ public class GitSemverInstallation {
         def latestBinary = null
         def currentTime = System.currentTimeMillis()
         def binaryPattern = GitSemverInstallation.getBinaryName("v?(\\d+\\.\\d+\\.\\d+)", os, arch) + ".*"
+        def binaryPatternRegex = ~binaryPattern
         if (location.exists()) {
             location.listFiles().each { File file ->
-                if (file.name =~ binaryPattern) {
+                if (file.name =~ binaryPatternRegex) {
                     Loggy.info("Checking ${file.name}")
                     def lastModified = file.lastModified()
                     def timeDiff = currentTime - lastModified

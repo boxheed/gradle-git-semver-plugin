@@ -9,7 +9,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional as OptionalTask
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.UntrackedTask
 
+@UntrackedTask(because = "This task requires git-semver execution output")
 public abstract class GitSemverInstallTask extends DefaultTask {
 
     public static final String NAME = "installSemver"
