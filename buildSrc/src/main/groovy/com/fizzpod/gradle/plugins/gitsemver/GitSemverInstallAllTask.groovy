@@ -39,19 +39,24 @@ public class GitSemverInstallAllTask extends DefaultTask {
     @TaskAction
     def runTask() {
         def extension = project.extensions.getByName(GitSemverPlugin.NAME)
+        def projectDir = project.rootDir
+        def semverDir = extension.location.get()
+        def repository = extension.repository.get()
+        def version = extension.version.get()
+        def ttl = extension.ttl.get()
         
         for(def osArch: osArches) {
             def osVal = osArch[0]
             def archVal = osArch[1]
             Loggy.lifecycle("Installing {} : {}", osVal, archVal)
             def context = [:]
-            context.projectDir = project.rootDir
-            context.semverDir = extension.location.get()
-            context.repository = extension.repository.get()
-            context.version = extension.version.get()
+            context.projectDir = projectDir
+            context.semverDir = semverDir
+            context.repository = repository
+            context.version = version
             context.os = osVal
             context.arch = archVal
-            context.ttl = extension.ttl.get()
+            context.ttl = ttl
             
             GitSemverInstallTask.run(context)
         }
