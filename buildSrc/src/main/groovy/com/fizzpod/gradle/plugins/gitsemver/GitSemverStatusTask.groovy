@@ -5,14 +5,22 @@ package com.fizzpod.gradle.plugins.gitsemver
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.process.ExecOperations
 
 @UntrackedTask(because = "This task requires git-semver execution output")
-public class GitSemverStatusTask extends DefaultTask {
+public abstract class GitSemverStatusTask extends DefaultTask {
 
     public static final String NAME = "gitStatus"
+
+    @PathSensitive
+    @InputDirectory
+    abstract DirectoryProperty getProjectDir()
 
     private final ExecOperations execOperations
 
@@ -25,22 +33,21 @@ public class GitSemverStatusTask extends DefaultTask {
         project.getLogger().info("Registering task {}", NAME)
         def taskContainer = project.getTasks()
 
-        return taskContainer.create(NAME, GitSemverStatusTask) {
-            group = GitSemverPlugin.GROUP
-            description = 'Outputs the status of the current changes'
+        return taskContainer.register(NAME, GitSemverStatusTask) {
+            it.group = GitSemverPlugin.GROUP
+            it.description = 'Outputs the status of the current changes'
         }
     }
 
     @TaskAction
     def runTask() {
-        // No need for extension here as we just run git status
         def context = [:]
-        context.projectDir = project.rootDir
+        context.projectDir = getProjectDir().get().asFile
         def changes = this.runGitStatus(context)
         if(changes.exit == 0) {
             Loggy.lifecycle("Git status: \n{}", changes.sout? changes.sout: "No Changes")
         } else {
-            Loggy.lifecycle("Git status error: \n{}\n", changes.serr, changes.serr)
+            Loggy.lifecycle("Git status error: \n{}\n", changes.serr)
         }
     }
 

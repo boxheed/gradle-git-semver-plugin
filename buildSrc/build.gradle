@@ -4,23 +4,15 @@ repositories {
 
 dependencies {
 
-  implementation 'commons-io:commons-io:2.21.0'
+  implementation 'commons-io:commons-io:2.22.0'
   implementation 'com.jayway.jsonpath:json-path:3.0.0'
   implementation 'org.rauschig:jarchivelib:1.2.0'
   implementation 'com.squareup.okhttp3:okhttp:5.3.2'
   
-  testImplementation('com.netflix.nebula:nebula-test:12.1.0') 
+  testImplementation('com.netflix.nebula:nebula-test:12.3.0') 
   testImplementation('org.spockframework:spock-core:2.4-groovy-4.0')
   testImplementation("org.spockframework:spock-junit4:2.4-groovy-4.0")
   testImplementation("org.junit.vintage:junit-vintage-engine:6.0.3")
-
-  test {
-    useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-        showStandardStreams = true
-    }
-  }
 
   constraints {
     implementation('org.apache.commons:commons-compress') {
@@ -50,12 +42,14 @@ dependencies {
       }
     }
   }
+  
+}
 
-  test {
+tasks.withType(Test) {
     useJUnitPlatform()
     testLogging {
       events "passed", "skipped", "failed"
+      showStandardStreams = true
     }
-  }
-  
+    jvmArgs '--add-opens=java.base/java.lang=ALL-UNNAMED'
 }

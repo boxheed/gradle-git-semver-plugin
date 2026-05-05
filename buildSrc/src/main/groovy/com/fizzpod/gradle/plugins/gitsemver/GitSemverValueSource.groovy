@@ -30,14 +30,18 @@ public abstract class GitSemverValueSource implements ValueSource<String, GitSem
     @Override
     public String obtain() {
         def params = getParameters()
-        def projectDir = params.getProjectDir().get().asFile
-        def semverDirName = params.getSemverDir().get()
+        def projectDirProv = params.getProjectDir()
+        if (!projectDirProv.isPresent()) {
+            return "0.0.0-NO-PROJECT-DIR"
+        }
+        def projectDir = projectDirProv.get().asFile
+        def semverDirName = params.getSemverDir().getOrElse(".git-semver")
         def location = new File(projectDir, semverDirName)
 
         // Check if any binary exists within ttl
         def arch = OS.getArch(params.getArch().getOrNull())
         def os = OS.getOs(params.getOs().getOrNull())
-        def ttl = params.getTtl().get()
+        def ttl = params.getTtl().getOrElse(1000 * 60 * 60 * 24L)
         def binary = GitSemverInstallation.resolveTtl(location, arch, os, ttl)
 
         // Install if needed
@@ -46,19 +50,28 @@ public abstract class GitSemverValueSource implements ValueSource<String, GitSem
         }
         
         if (binary == null) {
-            // Fallback or error?
-            // If we can't install, we can't determine version.
-            return "0.0.0-FAILED"
+            return "0.0.0-INSTALL-FAILED"
         }
 
+        def context = [:]
+        context.binary = binary
+        context.projectDir = projectDir
+        context.semverDir = semverDirName
+        context.repository = params.getRepository().getOrNull()
+        context.version = params.getToolVersion().getOrNull()
+        context.os = params.getOs().getOrNull()
+        context.arch = params.getArch().getOrNull()
+        context.ttl = ttl
+        context.stable = params.getStable().getOrElse(true)
+
         // Get Current Version
-        def currentVersion = runGitSemver(binary, projectDir, "latest", params.getStable().get())
+        def currentVersion = runGitSemver(getExecOperations(), context, "latest")
         if (currentVersion == null) {
-             return "0.0.0-UNKNOWN"
+             return "0.0.0-LATEST-FAILED"
         }
 
         // Get Next Version
-        def nextVersion = runGitSemver(binary, projectDir, "next", params.getStable().get())
+        def nextVersion = runGitSemver(getExecOperations(), context, "next")
         if (nextVersion == null) {
              nextVersion = currentVersion // Fallback
         }
@@ -73,60 +86,52 @@ public abstract class GitSemverValueSource implements ValueSource<String, GitSem
             snapshot = true
         }
 
-        return snapshot ? nextVersion + params.getSnapshotSuffix().get() : nextVersion
+        def suffix = params.getSnapshotSuffix().getOrElse("-SNAPSHOT")
+        return snapshot ? nextVersion + suffix : nextVersion
     }
 
     private File install(File location, Params params) {
-         def repo = params.getRepository().get()
+         def repo = params.getRepository().getOrNull()
          def arch = params.getArch().getOrNull()
          def os = params.getOs().getOrNull()
-         def version = params.getToolVersion().get()
+         def version = params.getToolVersion().getOrNull()
+
+         if (!repo || !version) {
+             return null
+         }
 
          try {
-             def context = GitSemverInstallation.install(repo, arch, os, version, location)
-             return context.binary
+             return GitSemverInstallation.install(repo, arch, os, version, location)
          } catch (Exception e) {
-             // In case of error, we can't log easily from here without SLF4J or similar
              return null
          }
     }
 
-    private String runGitSemver(File binary, File projectDir, String mode, boolean stable) {
-        def args = []
-        args.add(mode)
-        if (mode == "next") {
-             args.add("--stable=" + stable)
-        }
-        args.add("-w")
-        args.add(projectDir.getAbsolutePath())
-
-        return execute(binary.getAbsolutePath(), args, projectDir)
-    }
-
-    private boolean checkGitStatus(File projectDir) {
-        def output = execute("git", ["status", "--porcelain=v1"], projectDir)
-        return output != null && !output.isEmpty()
-    }
-
-    private String execute(String command, List<String> args, File workDir) {
-        def stdout = new ByteArrayOutputStream()
-        def stderr = new ByteArrayOutputStream()
+    private String runGitSemver(ExecOperations execOperations, Map context, String mode) {
+        context.mode = mode
         try {
-            def result = getExecOperations().exec {
-                workingDir workDir
-                commandLine command
-                args args
-                standardOutput = stdout
-                errorOutput = stderr
-                ignoreExitValue = true
-            }
-            if (result.exitValue == 0) {
-                return stdout.toString().trim()
+            if (mode == "latest") {
+                 return GitSemverCurrentVersionTask.run(execOperations, context)
             } else {
-                return null
+                 return GitSemverNextVersionTask.run(execOperations, context)
             }
         } catch (Exception e) {
             return null
+        }
+    }
+
+    private boolean checkGitStatus(File projectDir) {
+        def stdout = new ByteArrayOutputStream()
+        try {
+            def result = getExecOperations().exec {
+                workingDir projectDir
+                commandLine "git", "status", "--porcelain=v1"
+                standardOutput = stdout
+                ignoreExitValue = true
+            }
+            return result.exitValue == 0 && !stdout.toString().trim().isEmpty()
+        } catch (Exception e) {
+            return false
         }
     }
 }

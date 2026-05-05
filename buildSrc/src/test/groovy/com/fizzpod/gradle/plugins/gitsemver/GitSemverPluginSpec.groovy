@@ -87,7 +87,7 @@ class GitSemverPluginSpec extends Specification {
             task.runTask()
         then: 
             !project.getTasksByName(GitSemverCurrentVersionTask.NAME, false).isEmpty()
-            task.currentVersion == "1.2.3"
+            task.currentVersion.get() == "1.2.3"
     }
 
     def "run GitSemverInstallAllTask"() {
