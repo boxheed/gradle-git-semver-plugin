@@ -13,6 +13,7 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional as OptionalTask
 import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.process.ExecOperations
@@ -25,7 +26,7 @@ public abstract class GitSemverCurrentVersionTask extends DefaultTask {
     @Internal
     abstract Property<String> getCurrentVersion()
 
-    @PathSensitive
+    @PathSensitive(PathSensitivity.RELATIVE)
     @InputDirectory
     abstract DirectoryProperty getProjectDir()
 

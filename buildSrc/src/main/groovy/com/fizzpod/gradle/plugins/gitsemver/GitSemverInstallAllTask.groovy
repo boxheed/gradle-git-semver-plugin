@@ -10,6 +10,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 
@@ -18,7 +19,7 @@ public abstract class GitSemverInstallAllTask extends DefaultTask {
 
     public static final String NAME = "installAllSemvers"
 
-    @PathSensitive
+    @PathSensitive(PathSensitivity.RELATIVE)
     @InputDirectory
     abstract DirectoryProperty getProjectDir()
 
