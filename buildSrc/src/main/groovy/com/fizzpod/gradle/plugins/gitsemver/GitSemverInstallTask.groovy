@@ -11,6 +11,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional as OptionalTask
 import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 
@@ -21,7 +22,7 @@ public abstract class GitSemverInstallTask extends DefaultTask {
 
     public static final String GITSEMVER_INSTALL_DIR = ".git-semver"
 
-    @PathSensitive
+    @PathSensitive(PathSensitivity.RELATIVE)
     @InputDirectory
     abstract DirectoryProperty getProjectDir()
     @Input
