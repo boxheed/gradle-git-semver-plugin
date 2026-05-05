@@ -5,13 +5,34 @@ package com.fizzpod.gradle.plugins.gitsemver
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 
 @UntrackedTask(because = "This task requires git-semver execution output")
-public class GitSemverInstallAllTask extends DefaultTask {
+public abstract class GitSemverInstallAllTask extends DefaultTask {
 
     public static final String NAME = "installAllSemvers"
+
+    @PathSensitive
+    @InputDirectory
+    abstract DirectoryProperty getProjectDir()
+
+    @Input
+    abstract Property<String> getSemverDir()
+
+    @Input
+    abstract Property<String> getRepository()
+
+    @Input
+    abstract Property<String> getToolVersion()
+
+    @Input
+    abstract Property<Long> getTtl()
 
     private def osArches = [
         [OS.Family.LINUX.id, OS.Arch.AMD64.id],
@@ -29,21 +50,19 @@ public class GitSemverInstallAllTask extends DefaultTask {
         project.getLogger().info("Registering task {}", NAME)
         def taskContainer = project.getTasks()
 
-        taskContainer.create([name: NAME,
-            type: GitSemverInstallAllTask,
-            dependsOn: [],
-            group: GitSemverPlugin.GROUP,
-            description: 'Download and install all git-semver binaries'])
+        return taskContainer.register(NAME, GitSemverInstallAllTask) {
+            it.group = GitSemverPlugin.GROUP
+            it.description = 'Download and install all git-semver binaries'
+        }
     }
 
     @TaskAction
     def runTask() {
-        def extension = project.extensions.getByName(GitSemverPlugin.NAME)
-        def projectDir = project.rootDir
-        def semverDir = extension.location.get()
-        def repository = extension.repository.get()
-        def version = extension.version.get()
-        def ttl = extension.ttl.get()
+        def projectDir = getProjectDir().get().asFile
+        def semverDir = getSemverDir().get()
+        def repository = getRepository().get()
+        def version = getToolVersion().get()
+        def ttl = getTtl().get()
         
         for(def osArch: osArches) {
             def osVal = osArch[0]

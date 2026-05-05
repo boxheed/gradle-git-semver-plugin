@@ -6,17 +6,54 @@ import groovy.json.*
 import javax.inject.Inject
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional as OptionalTask
+import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
+import org.gradle.process.ExecOperations
 
 @UntrackedTask(because = "This task requires git-semver execution output")
-public class GitSemverCurrentVersionTask extends DefaultTask {
+public abstract class GitSemverCurrentVersionTask extends DefaultTask {
 
     public static final String NAME = "semver"
 
     @Internal
-    String currentVersion
+    abstract Property<String> getCurrentVersion()
+
+    @PathSensitive
+    @InputDirectory
+    abstract DirectoryProperty getProjectDir()
+
+    @Input
+    abstract Property<String> getSemverDir()
+
+    @Input
+    abstract Property<String> getRepository()
+
+    @Input
+    abstract Property<String> getToolVersion()
+
+    @Input
+    @OptionalTask
+    abstract Property<String> getOs()
+
+    @Input
+    @OptionalTask
+    abstract Property<String> getArch()
+
+    @Input
+    abstract Property<Long> getTtl()
+
+    @Input
+    abstract Property<Boolean> getStable()
+
+    @Inject
+    protected abstract ExecOperations getExecOperations()
 
     @Inject
     public GitSemverCurrentVersionTask() {
@@ -26,43 +63,38 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
         Loggy.debug("Registering task {}", NAME)
         def taskContainer = project.getTasks()
 
-        return taskContainer.create([name: NAME,
-            type: GitSemverCurrentVersionTask,
-            dependsOn: [],
-            group: GitSemverPlugin.GROUP,
-            description: 'Gets the current semantic version'])
+        return taskContainer.register(NAME, GitSemverCurrentVersionTask) {
+            it.group = GitSemverPlugin.GROUP
+            it.description = 'Gets the current semantic version'
+        }
     }
 
     @TaskAction
-    def runTask() {
-        def extension = project.extensions.getByName(GitSemverPlugin.NAME)
+    public void runTask() {
         def context = [:]
         
-        // For InstallTask
-        context.projectDir = project.rootDir
-        context.semverDir = extension.location.get()
-        context.repository = extension.repository.get()
-        context.version = extension.version.get()
-        context.os = extension.os.getOrNull()
-        context.arch = extension.arch.getOrNull()
-        context.ttl = extension.ttl.get()
-        
-        // For command
-        context.stable = extension.stable.get()
+        context.projectDir = getProjectDir().get().asFile
+        context.semverDir = getSemverDir().get()
+        context.repository = getRepository().get()
+        context.version = getToolVersion().get()
+        context.os = getOs().getOrNull()
+        context.arch = getArch().getOrNull()
+        context.ttl = getTtl().get()
+        context.stable = getStable().get()
 
-        def version = GitSemverCurrentVersionTask.run(context)
-        this.currentVersion = version
+        def version = run(getExecOperations(), context)
+        this.getCurrentVersion().set(version)
         project.logger.lifecycle(version)
     }
 
-    static def run = { context ->
+    public static String run(ExecOperations execOperations, Map context) {
         context.mode = "latest"
         def res = Optional.ofNullable(context)
             .map(x -> GitSemverInstallTask.location(x))
             .map(x -> GitSemverInstallTask.ttl(x))
             .map(x -> GitSemverInstallTask.install(x))
             .map(x -> GitSemverCurrentVersionTask.command(x))
-            .map(x -> Command.execute(x))
+            .map(x -> Command.execute(execOperations, x))
             .map(x -> {
                     if(x.exit == 0) {
                         return x
@@ -72,6 +104,7 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
                 })
             .map(x -> x.sout.trim())
             .orElseThrow(() -> new RuntimeException("Unable to run git-semver"))
+        return res
     }
 
     static def command = Loggy.wrap({ x ->
@@ -79,9 +112,9 @@ public class GitSemverCurrentVersionTask extends DefaultTask {
         def commandParts = []
         commandParts.add(x.binary.getAbsolutePath())
         commandParts.add(mode)
-        commandParts.add("-w ")
-        commandParts.add(x.projectDir)
-        x.command = commandParts.join(" ")
+        commandParts.add("-w")
+        commandParts.add(x.projectDir.getAbsolutePath())
+        x.commandParts = commandParts
         return x
     })
         

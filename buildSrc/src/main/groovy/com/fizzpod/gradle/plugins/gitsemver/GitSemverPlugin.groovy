@@ -13,19 +13,67 @@ public class GitSemverPlugin implements Plugin<Project> {
 
 	void apply(Project project) {
 		GitSemverPluginExtension extension = project.extensions.create(NAME, GitSemverPluginExtension)
+		
 		def installTask = GitSemverInstallTask.register(project)
         installTask.configure {
-            version.set(extension.version)
-            location.set(extension.location)
-            repository.set(extension.repository)
-            os.set(extension.os)
-            arch.set(extension.arch)
-            ttl.set(extension.ttl)
+            it.projectDir.set(project.getLayout().getProjectDirectory())
+            it.version.set(extension.version)
+            it.location.set(extension.location)
+            it.repository.set(extension.repository)
+            it.os.set(extension.os)
+            it.arch.set(extension.arch)
+            it.ttl.set(extension.ttl)
         }
+		
 		def installAllTask = GitSemverInstallAllTask.register(project)
+        installAllTask.configure {
+            it.projectDir.set(project.getLayout().getProjectDirectory())
+            it.semverDir.set(extension.location)
+            it.repository.set(extension.repository)
+            it.toolVersion.set(extension.version)
+            it.ttl.set(extension.ttl)
+        }
+
 		def currentVersionTask = GitSemverCurrentVersionTask.register(project)
+        currentVersionTask.configure {
+            it.projectDir.set(project.getLayout().getProjectDirectory())
+            it.semverDir.set(extension.location)
+            it.repository.set(extension.repository)
+            it.toolVersion.set(extension.version)
+            it.os.set(extension.os)
+            it.arch.set(extension.arch)
+            it.ttl.set(extension.ttl)
+            it.stable.set(extension.stable)
+        }
+
 		def nextVersionTask = GitSemverNextVersionTask.register(project)
+        nextVersionTask.configure {
+            it.projectDir.set(project.getLayout().getProjectDirectory())
+            it.semverDir.set(extension.location)
+            it.repository.set(extension.repository)
+            it.toolVersion.set(extension.version)
+            it.os.set(extension.os)
+            it.arch.set(extension.arch)
+            it.ttl.set(extension.ttl)
+            it.stable.set(extension.stable)
+        }
+
 		def statusTask = GitSemverStatusTask.register(project)
+        statusTask.configure {
+            it.projectDir.set(project.getLayout().getProjectDirectory())
+        }
+
 		def tagTask = GitSemverTagTask.register(project)
+        tagTask.configure {
+            it.projectDir.set(project.getLayout().getProjectDirectory())
+            it.semverDir.set(extension.location)
+            it.repository.set(extension.repository)
+            it.toolVersion.set(extension.version)
+            it.os.set(extension.os)
+            it.arch.set(extension.arch)
+            it.ttl.set(extension.ttl)
+            it.stable.set(extension.stable)
+            it.prefix.set(extension.prefix)
+        }
 	}
 }
