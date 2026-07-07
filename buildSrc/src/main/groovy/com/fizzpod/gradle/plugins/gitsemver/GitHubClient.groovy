@@ -52,14 +52,15 @@ public class GitHubClient {
             .build()
 
     private static final String GITHUB_MEDIA_TYPE = "application/vnd.github+json"
+    private static final java.util.regex.Pattern REPO_PATTERN = java.util.regex.Pattern.compile("https?://[^/]+/([^/]+/[^/]+?)(?:\\.git)?\$")
 
     static def getRelease = { repo, version ->
 
         //TODO allow full URL
         if (repo.startsWith("http")) {
-            def matcher = repo =~ /https?:\/\/[^\/]+\/([^\/]+\/[^\/]+?)(?:\.git)?$/
-            if (matcher) {
-                repo = matcher[0][1]
+            def matcher = REPO_PATTERN.matcher(repo)
+            if (matcher.find()) {
+                repo = matcher.group(1)
             }
         }
 
