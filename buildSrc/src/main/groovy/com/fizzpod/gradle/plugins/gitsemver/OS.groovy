@@ -1,4 +1,4 @@
-/* (C) 2024 */
+/* (C) 2024-2026 */
 /* SPDX-License-Identifier: Apache-2.0 */
 package com.fizzpod.gradle.plugins.gitsemver
 
@@ -18,8 +18,9 @@ public class OS {
         }
 
         static Family findByName(String name) {
+            def trimmedName = name?.trim()
             def res = values().find { 
-                it.toString().equalsIgnoreCase(name?.trim()) || it.id.equalsIgnoreCase(name?.trim())
+                it.toString().equalsIgnoreCase(trimmedName) || it.id.equalsIgnoreCase(trimmedName)
             }
             return res
         }
@@ -47,8 +48,9 @@ public class OS {
         }
 
         static Arch findByName(String name) {
+            def trimmedName = name?.trim()
             return values().find { 
-                it.toString().equalsIgnoreCase(name?.trim()) || it.id.equalsIgnoreCase(name?.trim())
+                it.toString().equalsIgnoreCase(trimmedName) || it.id.equalsIgnoreCase(trimmedName)
             }
         }
 
