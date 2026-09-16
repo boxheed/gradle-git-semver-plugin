@@ -15,8 +15,11 @@ buildscript {
   }
 }
 
-apply plugin: 'com.fizzpod.pater-build'
 apply plugin: 'com.fizzpod.git-semver'
+gitSemver {
+  stable = false
+}
+apply plugin: 'com.fizzpod.pater-build'
 apply from: './buildSrc/build.gradle'
 
 sourceSets {
