@@ -53,6 +53,7 @@ public class GitHubClient {
 
     private static final String GITHUB_MEDIA_TYPE = "application/vnd.github+json"
     private static final java.util.regex.Pattern REPO_PATTERN = java.util.regex.Pattern.compile("https?://[^/]+/([^/]+/[^/]+?)(?:\\.git)?\$")
+    private static final ThreadLocal<JsonSlurper> JSON_SLURPER = ThreadLocal.withInitial { new JsonSlurper() }
 
     static def getRelease = { repo, version ->
 
@@ -75,10 +76,8 @@ public class GitHubClient {
             .build()
         def result = null
         try(def response = okclient.newCall(request).execute()) {
-            String content = response.body().string()
             def code = response.code
-            def jsonSlurper = new JsonSlurper()
-            result = jsonSlurper.parseText(content)
+            result = JSON_SLURPER.get().parse(response.body().charStream())
             if(code != 200)  {
                 throw new IOException("Could not find release ${version} on repository ${repo}. status: ${code}")
             }
