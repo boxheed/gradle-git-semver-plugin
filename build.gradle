@@ -9,7 +9,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath ('com.fizzpod:gradle-plugin-opinion:24.3.0') {
+    classpath ('com.fizzpod:gradle-plugin-opinion:26.1.1') {
       exclude group: 'com.fizzpod', module: 'gradle-git-semver-plugin'
     }
   }
@@ -67,16 +67,6 @@ gradlePlugin {
       implementationClass = 'com.fizzpod.gradle.plugins.gitsemver.GitSemverPlugin'
     }
   }
-}
-
-def isCI = System.getenv('CI') != null
-
-develocity {
-    buildScan {
-        termsOfUseUrl = 'https://gradle.com/help/legal-terms-of-use'
-        termsOfUseAgree = 'yes'
-        publishing.onlyIf { isCI }
-    }
 }
 
 lefthook {
