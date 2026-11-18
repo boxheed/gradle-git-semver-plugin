@@ -61,7 +61,7 @@ gradlePlugin {
   plugins {
     plugin {
       description = 'Gradle plugin to integrate git-semver into a gradle project.'
-      tags.set(['git-semver', 'semantic versioning', 'conventional commits', 'git', 'version'])
+      tags.set(['git-semver', 'semantic-versioning', 'conventional-commits', 'git', 'version', 'convention', 'conventional', 'commits', 'semantic', 'versioning', 'git-log', 'git', 'semver'])
       id = 'com.fizzpod.git-semver'
       displayName = 'Gradle git-semver Plugin'
       implementationClass = 'com.fizzpod.gradle.plugins.gitsemver.GitSemverPlugin'
