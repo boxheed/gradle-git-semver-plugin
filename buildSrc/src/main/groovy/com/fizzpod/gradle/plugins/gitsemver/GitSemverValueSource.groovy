@@ -22,6 +22,7 @@ public abstract class GitSemverValueSource implements ValueSource<String, GitSem
         Property<Long> getTtl()
         Property<Boolean> getStable()
         Property<String> getSnapshotSuffix()
+        Property<String> getDefaultVersion()
     }
 
     @Inject
@@ -30,11 +31,17 @@ public abstract class GitSemverValueSource implements ValueSource<String, GitSem
     @Override
     public String obtain() {
         def params = getParameters()
+        def defaultVersion = params.getDefaultVersion().getOrElse(GitSemverPluginExtension.DEFAULT_VERSION)
         def projectDirProv = params.getProjectDir()
         if (!projectDirProv.isPresent()) {
             return "0.0.0-NO-PROJECT-DIR"
         }
         def projectDir = projectDirProv.get().asFile
+        def repoStatus = GitRepoStatus.inspect(getExecOperations(), projectDir)
+        if (repoStatus != GitRepoStatus.State.VALID) {
+            Loggy.warn(repoStatus.warningMessage(projectDir))
+            return defaultVersion
+        }
         def semverDirName = params.getSemverDir().getOrElse(".git-semver")
         def location = new File(projectDir, semverDirName)
 

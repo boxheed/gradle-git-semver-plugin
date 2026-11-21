@@ -11,6 +11,8 @@ import org.gradle.api.provider.ProviderFactory
 
 public abstract class GitSemverPluginExtension {
 
+    public static final String DEFAULT_VERSION = "0.0.0"
+
     abstract Property<String> getVersion()
     abstract Property<String> getLocation()
     abstract Property<String> getRepository()
@@ -21,6 +23,7 @@ public abstract class GitSemverPluginExtension {
     abstract Property<File> getBinary()
 
     abstract Property<String> getSnapshotSuffix()
+    abstract Property<String> getDefaultVersion()
     abstract Property<Long> getTtl()
     abstract Property<Boolean> getStable()
 
@@ -37,6 +40,7 @@ public abstract class GitSemverPluginExtension {
         getPrefix().convention("v")
         getFlags().convention("")
         getSnapshotSuffix().convention("-SNAPSHOT")
+        getDefaultVersion().convention(DEFAULT_VERSION)
         getTtl().convention(1000 * 60 * 60 * 24L)
         getStable().convention(true)
 
@@ -51,6 +55,7 @@ public abstract class GitSemverPluginExtension {
             spec.parameters.ttl.set(getTtl())
             spec.parameters.stable.set(getStable())
             spec.parameters.snapshotSuffix.set(getSnapshotSuffix())
+            spec.parameters.defaultVersion.set(getDefaultVersion())
         })
     }
 

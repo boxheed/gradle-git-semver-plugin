@@ -60,6 +60,9 @@ class GitSemverPluginSpec extends Specification {
             extension.snapshotSuffix instanceof org.gradle.api.provider.Property
             extension.snapshotSuffix.get() == "-SNAPSHOT"
 
+            extension.defaultVersion instanceof org.gradle.api.provider.Property
+            extension.defaultVersion.get() == "0.0.0"
+
             extension.ttl instanceof org.gradle.api.provider.Property
             extension.ttl.get() == 1000 * 60 * 60 * 24L
 
@@ -196,6 +199,76 @@ class GitSemverPluginSpec extends Specification {
             task.runTask()
         then: 
             !project.getTasksByName(GitSemverTagTask.NAME, false).isEmpty()
+    }
+
+    def "run GitSemverCurrentVersionTask when not a git repo defaults to static version"() {
+        setup:
+            def root = fsFixture.getCurrentPath().toFile()
+            Project project = ProjectBuilder.builder().withProjectDir(root).build()
+
+        when:
+            def plugin = new GitSemverPlugin()
+            plugin.apply(project)
+            def task = project.getTasksByName(GitSemverCurrentVersionTask.NAME, false).iterator().next()
+            task.runTask()
+
+        then:
+            task.currentVersion.get() == "0.0.0"
+    }
+
+    def "run GitSemverCurrentVersionTask when git repo has no commits defaults to static version"() {
+        setup:
+            def root = fsFixture.getCurrentPath().toFile()
+            Command.runInDir("git init", root)
+            Project project = ProjectBuilder.builder().withProjectDir(root).build()
+
+        when:
+            def plugin = new GitSemverPlugin()
+            plugin.apply(project)
+            def task = project.getTasksByName(GitSemverCurrentVersionTask.NAME, false).iterator().next()
+            task.runTask()
+
+        then:
+            task.currentVersion.get() == "0.0.0"
+    }
+
+    def "run GitSemverNextVersionTask when not a git repo does not throw"() {
+        setup:
+            def root = fsFixture.getCurrentPath().toFile()
+            Project project = ProjectBuilder.builder().withProjectDir(root).build()
+
+        when:
+            def plugin = new GitSemverPlugin()
+            plugin.apply(project)
+            def task = project.getTasksByName(GitSemverNextVersionTask.NAME, false).iterator().next()
+            task.runTask()
+
+        then:
+            noExceptionThrown()
+    }
+
+    def "run GitSemverCurrentVersionTask in a git worktree defaults to static version"() {
+        setup:
+            fsFixture.create {
+                dir("main-repo") {}
+            }
+            def mainRepo = fsFixture.resolve("main-repo").toFile()
+            def worktreeDir = fsFixture.resolve("linked-worktree").toFile()
+            Command.runInDir("git init", mainRepo)
+            Command.runInDir("git config user.email \"you@example.com\"", mainRepo)
+            Command.runInDir("git config user.name \"Your Name\"", mainRepo)
+            Command.runInDir("git commit --allow-empty -m \"initial\"", mainRepo)
+            Command.runInDir("git worktree add ${worktreeDir.getAbsolutePath()}", mainRepo)
+            Project project = ProjectBuilder.builder().withProjectDir(worktreeDir).build()
+
+        when:
+            def plugin = new GitSemverPlugin()
+            plugin.apply(project)
+            def task = project.getTasksByName(GitSemverCurrentVersionTask.NAME, false).iterator().next()
+            task.runTask()
+
+        then:
+            task.currentVersion.get() == "0.0.0"
     }
 
     private void mockGitSemver(File root, String version) {

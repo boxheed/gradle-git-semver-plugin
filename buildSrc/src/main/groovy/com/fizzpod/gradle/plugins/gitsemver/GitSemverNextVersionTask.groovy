@@ -49,6 +49,10 @@ public abstract class GitSemverNextVersionTask extends DefaultTask {
     @Input
     abstract Property<Boolean> getStable()
 
+    @Input
+    @OptionalTask
+    abstract Property<String> getDefaultVersion()
+
     @Inject
     protected abstract ExecOperations getExecOperations()
 
@@ -78,12 +82,18 @@ public abstract class GitSemverNextVersionTask extends DefaultTask {
         context.arch = getArch().getOrNull()
         context.ttl = getTtl().get()
         context.stable = getStable().get()
+        context.defaultVersion = getDefaultVersion().getOrElse(GitSemverPluginExtension.DEFAULT_VERSION)
         
         def version = run(getExecOperations(), context)
         project.logger.lifecycle(version)
     }
 
     public static String run(ExecOperations execOperations, Map context) {
+        def repoStatus = GitRepoStatus.inspect(execOperations, context.projectDir)
+        if (repoStatus != GitRepoStatus.State.VALID) {
+            Loggy.warn(repoStatus.warningMessage(context.projectDir))
+            return context.defaultVersion ?: GitSemverPluginExtension.DEFAULT_VERSION
+        }
         context.mode = "next"
         def res = Optional.ofNullable(context)
             .map(x -> GitSemverInstallTask.location(x))

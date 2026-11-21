@@ -44,6 +44,7 @@ public class GitSemverPlugin implements Plugin<Project> {
             it.arch.set(extension.arch)
             it.ttl.set(extension.ttl)
             it.stable.set(extension.stable)
+            it.defaultVersion.set(extension.defaultVersion)
         }
 
 		def nextVersionTask = GitSemverNextVersionTask.register(project)
@@ -56,6 +57,7 @@ public class GitSemverPlugin implements Plugin<Project> {
             it.arch.set(extension.arch)
             it.ttl.set(extension.ttl)
             it.stable.set(extension.stable)
+            it.defaultVersion.set(extension.defaultVersion)
         }
 
 		def statusTask = GitSemverStatusTask.register(project)
